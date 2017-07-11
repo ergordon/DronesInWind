@@ -80,7 +80,11 @@ function [process,controller] = SetupSimulation(process)
 % - State time.
 process.tStart = 0;
 % - Stop time.
+<<<<<<< HEAD
 process.tStop = 60;
+=======
+process.tStop = 5;
+>>>>>>> origin/master
 % - Time step.
 process.tStep = 1/50;
 % - Names of things to log in datafile, if desired
@@ -232,7 +236,11 @@ w = U(1,1);
 f = U(2,1);
 % compute rates of change
 d_x = xdot;
+<<<<<<< HEAD
 d_xdot = (f/process.m)*sin(theta);
+=======
+d_xdot = (f/process.m)*sin(theta) + 0;  %MODIFICATION: WIND
+>>>>>>> origin/master
 d_z = zdot;
 d_zdot = (f/process.m)*cos(theta)-process.g;
 d_theta = w;
@@ -263,7 +271,10 @@ if (isempty(fig))
     
     % Clear the current figure.
     clf;
+<<<<<<< HEAD
     
+=======
+>>>>>>> origin/master
     % Create an axis for text (it's important this is in the back,
     % so you can rotate the view and other stuff!)
     fig.text.axis = axes('position',[0 0 1 1]);
@@ -279,7 +290,11 @@ if (isempty(fig))
         color = 'r';
     end
     fig.text.status=text(0.05,0.975,...
+<<<<<<< HEAD
         sprintf('CONTROLLER: %s',status),...
+=======
+        sprintf('SPEED RACER: %s',status),... % MODIFICATION
+>>>>>>> origin/master
         'fontweight','bold','fontsize',fs,...
         'color',color,'verticalalignment','top');
     fig.text.time=text(0.05,0.12,...
@@ -331,7 +346,11 @@ else
         status = 'OFF';
         color = 'r';
     end
+<<<<<<< HEAD
     set(fig.text.status,'string',sprintf('CONTROLLER: %s',status),'color',color);
+=======
+    set(fig.text.status,'string',sprintf('SPEED RACER: %s',status),'color',color); % MODIFICATION
+>>>>>>> origin/master
     
     % Quadcopter
     fig.view0.spar = DrawBox(fig.view0.spar,...
@@ -358,7 +377,11 @@ p = 0.5*[-boxLength boxLength boxLength -boxLength -boxLength;
          -boxWidth -boxWidth boxWidth boxWidth -boxWidth];
 p = repmat(o,1,size(p,2))+R*p;
 if isempty(box)
+<<<<<<< HEAD
     box = fill(p(1,:),p(2,:),'y');
+=======
+    box = fill(p(1,:),p(2,:),'r');
+>>>>>>> origin/master
 else
     set(box,'xdata',p(1,:),'ydata',p(2,:));
 end
