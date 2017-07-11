@@ -1,5 +1,5 @@
 clc; clear;
-addpath ../OptimTraj/
+addpath OptimTraj/
 
 maxThrust = 15;
 maxPitchRate = 5;
