@@ -34,6 +34,34 @@
 
 
 \section{Goal}
+The "Drones in Wind" simulation simulates the flight of a quadcopter drone. The drone in the simulation will be modeled after the AscTec Pelican, a research-drone by the German company Ascending Technologies. The simulated drone as of the point of writing this paper is equipped with sensors to measure the velocity in the horizontal and vertical axis, the vertical position and the pitch angle. 
+\newline \newline
+The goal is to create a controller that linearizes about a trajectory given by the third-party program OptimTraj. The trajectory comes from a cost function that minimizes time. A requirement for this model is established such that the time of multiple completed simulations will have a coefficient of variation less than one. Since the simulation should be of an optimized trajectory, minimal variations should be expected. With this requirement in mind, a procedure for verification is established. Verification ensures that the system meets the established requirements. Verification will be conducted through several methodologies and are as follows
+\begin{itemize}
+\item Data will be acquired for up to 100 flight simulations. This will be done by implementing the script shown in Figure \ref{fig:fgc}.
+\item Using Matlab, a histogram can be created in order to visualize the frequency of the drones flight times. 
+\item Using Matlab, the coefficient of variation will be calculated can be computed for the acquired data.
+\begin{figure}[H]
+\begin{quote}
+\begin{lstlisting}
+% Number of flights
+nFlights = 100;
+% Loop over each flight
+for i=1:nFlights
+    % Run simulation without graphics and save data
+    DesignProblem0('Controller','datafile','data.mat','display',false);
+    % Load data
+    load('data.mat');
+    % Get t and x
+    t = processdata.t
+    x = processdata.x
+    % DOUBLE CHECK THE CODE.
+end
+\end{lstlisting}
+\end{quote}
+\caption{Flight Generation Code\label{fig:fgc}}
+\end{figure}
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                 Model                                                                                  %
@@ -55,6 +83,10 @@
 %                                                                                Analysis                                                                                %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Analysis}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                                Future Work                                                                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Future Work}
 % Display list of references in IEEE Transactions format.
 \bibliographystyle{IEEEtran}
 \bibliography{IEEEabrv,references}
