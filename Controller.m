@@ -30,26 +30,6 @@ func.init = @initControlSystem;
 func.run = @runControlSystem;
 end
 
-<<<<<<< HEAD
-%
-% STEP #1: Modify, but do NOT rename, this function. It is called once,
-% before the simulation loop starts.
-%
-
-function [actuators,data] = initControlSystem(sensors,references,parameters,data)
-[actuators,data] = runControlSystem(sensors,references,parameters,data);
-end
-
-%
-% STEP #2: Modify, but do NOT rename, this function. It is called every
-% time through the simulation loop.
-%
-
-function [actuators,data] = runControlSystem(sensors,references,parameters,data)
-actuators.thrust = 0;
-actuators.pitchrate = 0;
-end
-=======
 
 function [actuators,data] = initControlSystem(sensors,references,parameters,data)
 
@@ -117,5 +97,8 @@ state = [sensors.x; sensors.xdot; sensors.z; sensors.zdot; sensors.theta] - ...
 input = -K*state;
 actuators.thrust = input(2) + parameters.g;
 actuators.pitchrate = input(1);
+
+if (sensors.xdot==0 && sensors.zdot == 0)
+    data.timeEnd = t
 end
->>>>>>> origin/master
+end
