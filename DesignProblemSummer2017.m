@@ -279,7 +279,7 @@ if (isempty(fig))
         color = 'r';
     end
     fig.text.status=text(0.05,0.975,...
-        sprintf('SPEED RACER: %s',status),... % MODIFICATION
+        sprintf('CONTROLLER: %s',status),... % MODIFICATION
         'fontweight','bold','fontsize',fs,...
         'color',color,'verticalalignment','top');
     fig.text.time=text(0.05,0.12,...
@@ -331,7 +331,7 @@ else
         status = 'OFF';
         color = 'r';
     end
-    set(fig.text.status,'string',sprintf('SPEED RACER: %s',status),'color',color);%Modification
+    set(fig.text.status,'string',sprintf('CONTROLLER: %s',status),'color',color);%Modification
     
     % Quadcopter
     fig.view0.spar = DrawBox(fig.view0.spar,...
