@@ -10,8 +10,8 @@ w = controllerdata.actuators.pitchrate;
 %plot(t,x,t,xdot,t,z,t,zdot,t,theta)
 plot(t,f)
 %legend('x','xdot','z','zdot','theta')
-xlabel('time')
+xlabel('Time, t')
 %ylabel('m, m/s, rad')
-ylabel('N')
-title('3 Second, input minimizing')
+ylabel('Thrust, N')
+title('5 Second, error minimizing')
 grid on

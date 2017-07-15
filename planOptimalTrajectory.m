@@ -3,7 +3,7 @@ addpath OptimTraj/
 
 maxThrust = 15;
 maxPitchRate = 5;
-duration = 2;
+duration = 5;
 xInitial = 0;
 zInitial = 0;
 xFinal = 1;

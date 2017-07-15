@@ -61,6 +61,11 @@ data.trajZdot = x(4,:);
 data.trajTheta = x(5,:);
 data.trajIND = 1;
 
+% Analysis variables
+data.stationaryVelocityMargin = .01; % Required velocity from rest (for both x and z)
+data.finalPositionMargin = .01; % Required distance from final position (for both x and z)
+data.endBool = 0; % Used to only display the end time once
+
 % Run the controller
 [actuators,data] = runControlSystem(sensors,references,parameters,data);
 end
@@ -98,7 +103,13 @@ input = -K*state;
 actuators.thrust = input(2) + parameters.g;
 actuators.pitchrate = input(1);
 
-if (sensors.xdot==0 && sensors.zdot == 0)
-    data.timeEnd = t
+if abs(sensors.xdot) < data.stationaryVelocityMargin && ...
+        abs(sensors.zdot) < data.stationaryVelocityMargin && ...
+        abs(sensors.x - data.trajX(end)) < data.finalPositionMargin && ...
+        abs(sensors.z - data.trajZ(end)) < data.finalPositionMargin && ...
+        data.endBool == 0
+    data.endBool = 1;
+    data.timeEnd = data.trajT(ind);
+    fprintf('End State Achieved at: %f seconds\n', data.timeEnd)
 end
 end
