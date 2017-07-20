@@ -67,6 +67,36 @@ end
 %                                                                                 Model                                                                                  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Model}
+
+The state for the system is defined as
+\begin{equation}
+\label{state}
+x = \begin{bmatrix} x\\ \dot{x} \\ z \\ \dot{z} \\ \theta \end{bmatrix}
+\end{equation}
+
+Where $x$, $z$, correspond to horizontal and vertical position, respectively, and $\theta$ corresponds to the angle of the quad from upright.
+
+The inputs for the system are defined as
+
+\begin{equation}
+\label{inputs}
+u = \begin{bmatrix} \omega \\ f \end{bmatrix}
+\end{equation}
+
+Where $\omega$ corresponds to angular pitch rate and $f$ corresponds to thrust.
+Taking the jacobian lends the following A and B matrices
+
+\begin{equation}
+\label{A_matrix}
+A = \begin{bmatrix} 0 && 1 && 0 && 0 && 0 \\ 0 && 0 && 0 && 0 && \frac{f\cos{\theta}}{m} \\  0 && 0 && 0 && 1 && 0 \\ 0 && 0 && 0 && 0 && \frac{-f\sin{\theta}}{m} \\ 0 && 0 && 0 && 0 && 0 \end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\label{B_matrix}
+B = \begin{bmatrix} 0 && 0 \\ 0 && \frac{\sin{\theta}}{m} \\ 0 && 0 \\ 0 && \frac{\cos{\theta}}{m} \\ 1 && 0 \end{bmatrix}
+\end{equation}
+
+We have no need to substitute in equilibrium conditions because we are linearizing about a trajectory.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              Controller                                                                               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
