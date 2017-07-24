@@ -124,7 +124,7 @@ Logic is used at the start of the control loop to determine if there is still tr
 
 After determining that the simulation is still within the regime in which a trajectory is available, the controller will find the respective trajectory point to linearize about for the current timestep.  The angle for this trajectory point is passed into the MATLAB functions to determine the relevant A and B matrices, which are then used in conjunction with the already initialized weights to create a gain matrix using LQR.
 
-Finally, the input $u = -Kx$ is applied in which $u$ is a column of two inputs, the first being pitch rate and the second being thrust.  Note here that the thrust is augmented by the equilibrium condition for hover, $f = mg$.  $K$ is the previously specified gain matrix, and x is the difference between the current state and the trajectory state at the current time.
+Finally, the input $u = -Kx$ is applied in which $u$ is a column of two inputs, the first being thrust and the second being pitch rate.  Note here that the thrust is augmented by the equilibrium condition for hover, $f = mg$.  K is the previously specified gain matrix, and x is the difference between the current state and the trajectory state at the current time.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                               OptimTraj                                                                             %
