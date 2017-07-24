@@ -87,8 +87,20 @@ Where $\omega$ corresponds to angular pitch rate and $f$ corresponds to thrust.
 Taking the jacobian lends the following A and B matrices
 
 \begin{equation}
-\label{A_matrix}
+\label{A_matrix_intermediate}
 A = \begin{bmatrix} 0 && 1 && 0 && 0 && 0 \\ 0 && 0 && 0 && 0 && \frac{f\cos{\theta}}{m} \\  0 && 0 && 0 && 1 && 0 \\ 0 && 0 && 0 && 0 && \frac{-f\sin{\theta}}{m} \\ 0 && 0 && 0 && 0 && 0 \end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\label{B_matrix_intermediate}
+B = \begin{bmatrix} 0 && 0 \\ 0 && \frac{\sin{\theta}}{m} \\ 0 && 0 \\ 0 && \frac{\cos{\theta}}{m} \\ 1 && 0 \end{bmatrix}
+\end{equation}
+
+We now substitute in the equilibrium force, $f = mg$, lending the following matrices
+
+\begin{equation}
+\label{A_matrix}
+A = \begin{bmatrix} 0 && 1 && 0 && 0 && 0 \\ 0 && 0 && 0 && 0 && g\cos{\theta} \\  0 && 0 && 0 && 1 && 0 \\ 0 && 0 && 0 && 0 && -g\sin{\theta} \\ 0 && 0 && 0 && 0 && 0 \end{bmatrix}
 \end{equation}
 
 \begin{equation}
@@ -96,7 +108,6 @@ A = \begin{bmatrix} 0 && 1 && 0 && 0 && 0 \\ 0 && 0 && 0 && 0 && \frac{f\cos{\th
 B = \begin{bmatrix} 0 && 0 \\ 0 && \frac{\sin{\theta}}{m} \\ 0 && 0 \\ 0 && \frac{\cos{\theta}}{m} \\ 1 && 0 \end{bmatrix}
 \end{equation}
 
-We have no need to substitute in equilibrium conditions because we are linearizing about a trajectory.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              Controller                                                                               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -105,6 +116,16 @@ We have no need to substitute in equilibrium conditions because we are linearizi
 %                                                                               Controller                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Controller}
+The controller is designed to use in the loop control with LQR to follow a given trajectory.
+
+First, the init function creates a symbolic description of the A and B matrices, in which the angle $\theta$ is the only variable.  These symbolic descriptions are then turned into MATLAB functions and saved in the data struct.  The Q and R weight matrices are then initialized.  The init function proceeds to load in the trajectory data and also adds it to the data struct.  Finally, some parameters used to determine when the quad has reached its destination are initialized.
+
+Logic is used at the start of the control loop to determine if there is still trajectory data available for the current timestep.  If there is not, the controller will linearize about the last available trajectory point.  This case does not happen in current simulations because the trajectory is planned for the entire duration of the simulation.
+
+After determining that the simulation is still within the regime in which a trajectory is available, the controller will find the respective trajectory point to linearize about for the current timestep.  The angle for this trajectory point is passed into the MATLAB functions to determine the relevant A and B matrices, which are then used in conjunction with the already initialized weights to create a gain matrix using LQR.
+
+Finally, the input $u = -Kx$ is applied in which $u$ is a column of two inputs, the first being pitch rate and the second being thrust.  Note here that the thrust is augmented by the equilibrium condition for hover, $f = mg$.  $K$ is the previously specified gain matrix, and x is the difference between the current state and the trajectory state at the current time.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                               OptimTraj                                                                             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

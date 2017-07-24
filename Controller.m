@@ -100,8 +100,8 @@ K = lqr(A,B,data.Q,data.R);
 state = [sensors.x; sensors.xdot; sensors.z; sensors.zdot; sensors.theta] - ...
     [trajX; trajXdot; trajZ; trajZdot; trajTheta];
 input = -K*state;
-actuators.thrust = input(2) + parameters.g;
 actuators.pitchrate = input(1);
+actuators.thrust = input(2) + parameters.g*parameters.m;
 
 if abs(sensors.xdot) < data.stationaryVelocityMargin && ...
         abs(sensors.zdot) < data.stationaryVelocityMargin && ...
