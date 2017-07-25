@@ -9,7 +9,9 @@
 \usepackage{cite}
 \usepackage[caption=false,font=footnotesize]{subfig}
 \usepackage{float}
-
+\usepackage{float}
+\usepackage{enumitem}
+\setlist{nosep,after=\vspace{\baselineskip}}
 % Two more packages that make it easy to show MATLAB code
 \usepackage[T1]{fontenc}
 \usepackage[framed,numbered]{matlab-prettifier}
@@ -40,16 +42,16 @@ The "Drones in Wind" simulation simulates the flight of a quadcopter drone. The 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Model}
 The motion of the drone is governed by the ordinary differential equations with the state defined as
-\begin{equation*}
+\begin{equation}
 \label{state}
 x = \begin{bmatrix} x\\ \dot{x} \\ z \\ \dot{z} \\ \theta \end{bmatrix}
-\end{equation*}
+\end{equation}
 such that $x$, $z$, correspond to horizontal and vertical position, respectively, and $\theta$ corresponds to the angle of the quad from upright. The inputs for the system are defined as
-\begin{equation*}
+\begin{equation}
 \label{inputs}
 u = \begin{bmatrix} \omega \\ f \end{bmatrix}
-\end{equation*}
-such that $\omega$ corresponds to angular pitch rate and $f$ corresponds to thrust. Taking the jacobian lends the following A and B matrices shown by Equation \ref{A_matrix_intermediate} and Equation \ref{B_matrix_intermediate}
+\end{equation}
+such that $\omega$ corresponds to angular pitch rate and $f$ corresponds to thrust. Taking the Jacobian lends the following A and B matrices shown by Equation \ref{A_matrix_intermediate} and Equation \ref{B_matrix_intermediate}
 \begin{equation}
 \label{A_matrix_intermediate}
 A = \begin{bmatrix} 0 && 1 && 0 && 0 && 0 \\ 0 && 0 && 0 && 0 && \frac{f\cos{\theta}}{m} \\  0 && 0 && 0 && 1 && 0 \\ 0 && 0 && 0 && 0 && \frac{-f\sin{\theta}}{m} \\ 0 && 0 && 0 && 0 && 0 \end{bmatrix}
@@ -69,6 +71,7 @@ A = \begin{bmatrix} 0 && 1 && 0 && 0 && 0 \\ 0 && 0 && 0 && 0 && g\cos{\theta} \
 \label{B_matrix}
 B = \begin{bmatrix} 0 && 0 \\ 0 && \frac{\sin{\theta}}{m} \\ 0 && 0 \\ 0 && \frac{\cos{\theta}}{m} \\ 1 && 0 \end{bmatrix}
 \end{equation}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              Controller                                                                               %
@@ -93,6 +96,112 @@ Finally, the input $u = -Kx$ is applied in which $u$ is a column of two inputs, 
 %                                                                               OptimTraj                                                                             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{OptimTraj}
+
+OptimTraj \textcolor{red}{(Citation needed)} was used for trajectory planning. OptiTraj is a MATLAB library designed by a Cornell PHD student, Matthew P. Kelly, to solve for continuous-time single-phase trajectory optimization problems. For OptimTraj to solve the optimal trajectory, you must specify various parameters of your problem, including:
+\begin{itemize}
+  \item Dynamics
+  \item Objective function
+  \item Bounds
+  \item Initial trajectory guesses
+\end{itemize}
+
+\begin{flushleft}
+{\Large \textbf{\textbf{Function Dynamics}} }
+\end{flushleft}
+We begin by setting up the function dynamics, \lstinline!problem.func.dynamics!, as explained in the \textbf{Model} section above: 
+\begin{quote}
+\begin{lstlisting}
+syms xdot x zdot z theta w thrust real
+EOMs= [xdot;
+       (thrust/mass)*sin(theta);
+       zdot;
+       (thrust/mass)*cos(theta)-gravity;
+       w];
+
+numf = matlabFunction(EOMs,'vars',[x xdot z zdot theta w thrust]);
+problem.func.dynamics= @(t,x,u) numf( x(1,:),x(2,:),x(3,:),x(4,:),x(5,:),
+                                      u(1,:), u(2,:)) );
+
+\end{lstlisting}
+\end{quote}
+
+\begin{flushleft}
+{\Large \textbf{\textbf{Problem Bounds}} }
+\end{flushleft}
+
+The next step is to set up the \lstinline!problem.func.dynamics!. For the function dynamics, a mass-normalized thrust was chosen to keep the model simple, shown in \textbf{Table 1} below. 
+
+\begin{figure}[H]
+\begin{center}
+\begin{tabular}{ |p{2.5cm}||p{2cm}|p{3cm}| }
+ \hline
+ \multicolumn{3}{|c|}{\textbf{Table 1}   Problem Bounds} \\
+ \hline
+ Parameter & Value & Description\\
+ \hline
+ $t_{i}$   & 0 s  & Initial time\\
+ $t_{f}$  & 5 s  & Final time\\
+ $\underline{F}/m$ & 0 m/$s^{2}$ & Min thrust\\
+ $\overline{F}/m$ & 15 m/$s^{2}$ & Max thrust\\
+ $\overline{\omega}$ & 5 rad/s & Max pitch rate \\
+ \hline
+\end{tabular}
+\end{center}
+\end{figure}
+
+\clearpage
+
+\begin{flushleft}
+{\Large \textbf{\textbf{Cost Function}} }
+\end{flushleft}
+You can optimize for a certain aspect using a cost function. The cost functions for different things are shown below. 
+\begin{quote}
+\begin{lstlisting}
+% Input:
+problem.func.pathObj = @(t,x,u)( sum(u.^2,1) );
+
+% Thrust:
+problem.func.pathObj = @(t,x,u)( sum(u(2,:).^2,1) );
+
+% Pitch Rate:
+problem.func.pathObj = @(t,x,u)( sum(u(1,:).^2,1) );
+
+% time
+problem.func.pathObj = @(t,x,u)( sum((x(1,:)-x_f).^2,1) 
+                                +sum((x(3,:)-z_f).^2,1))
+
+\end{lstlisting}
+\end{quote}
+
+
+\begin{flushleft}
+{\Large \textbf{\textbf{Initialize Guess}} }
+\end{flushleft}
+
+Lastly, before running the solution, the solver must be initialized. This is done with the mandatory \lstinline!problem.guess! struct. Where $x_{i}$ and $x_{f}$ are the desired initial and final states, respectively. Additionally, $u_{i}$ and $u_{f}$ are the desired initial and final input, respectively. 
+
+\begin{figure}[H]
+\begin{equation*}
+\lstinline!problem.guess.time! = [t_{i}, t_{f}]
+\end{equation*}
+\begin{equation*}
+\lstinline!problem.guess.state! = [x_{i}, x_{f}]
+\end{equation*}
+\begin{equation*}
+\lstinline!problem.guess.control! = [u_{i}, u_{f}] 
+\end{equation*}
+\end{figure}
+\begin{flushleft}
+{\Large \textbf{\textbf{Options}} }
+\end{flushleft}
+
+You can add options using \lstinline!problem.options!, which include amount of details change accuracy settings, and select different solution methods. Different methods include trapezoid, Hermite Simpson, Chebyshev, and the Runge Kutta method.
+\newline
+
+\begin{flushleft}
+{\Large \textbf{\textbf{Solution}} }
+\end{flushleft}
+Finally, to solve, the command \lstinline!soln = optimTraj(problem)! is run. You can then unpack the simulation, save the data, and plot out
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                Analysis                                                                                %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
