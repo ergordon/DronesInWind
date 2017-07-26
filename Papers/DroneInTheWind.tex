@@ -46,7 +46,7 @@ The motion of the drone is governed by the ordinary differential equations with 
 \label{state}
 x = \begin{bmatrix} x\\ \dot{x} \\ z \\ \dot{z} \\ \theta \end{bmatrix}
 \end{equation}
-such that $x$, $z$, correspond to horizontal and vertical position, respectively, and $\theta$ corresponds to the angle of the quad from upright. The inputs for the system are defined as
+such that $x$ and $z$ correspond to horizontal and vertical position, respectively, while $\theta$ corresponds to the angle of the quad from upright. The inputs for the system are defined as
 \begin{equation}
 \label{inputs}
 u = \begin{bmatrix} \omega \\ f \end{bmatrix}
@@ -206,7 +206,7 @@ Finally, to solve, the command \lstinline!soln = optimTraj(problem)! is run. You
 %                                                                                Analysis                                                                                %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Analysis}
-
+A method that computes quadcopter trajectories satisfying the minimal principle with respect to time-optimality has been developed. The method is based on the two-dimensional quadcopter model with an optimal trajectory created using OptimTraj. By defining the dynamics, bounds and cost function the algorithm was able to create an optimal path for which the drone was to follow. Testing this method, the simulated drone accomplished moving from a position (0,0) to (1,1) in a time optimal manner.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                Future Work                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
