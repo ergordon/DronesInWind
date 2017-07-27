@@ -97,7 +97,7 @@ Finally, the input $u = -Kx$ is applied in which $u$ is a column of two inputs, 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{OptimTraj}
 
-OptimTraj \textcolor{red}{(Citation needed)} was used for trajectory planning. OptiTraj is a MATLAB library designed by a Cornell PHD student, Matthew P. Kelly, to solve for continuous-time single-phase trajectory optimization problems. For OptimTraj to solve the optimal trajectory, you must specify various parameters of your problem, including:
+OptimTraj \cite{OptimTraj} was used for trajectory planning. OptiTraj is a MATLAB library designed by a Cornell PHD student, Matthew P. Kelly, to solve for continuous-time single-phase trajectory optimization problems. For OptimTraj to solve the optimal trajectory, you must specify various parameters of your problem, including:
 \begin{itemize}
   \item Dynamics
   \item Objective function
@@ -105,10 +105,8 @@ OptimTraj \textcolor{red}{(Citation needed)} was used for trajectory planning. O
   \item Initial trajectory guesses
 \end{itemize}
 
-\begin{flushleft}
-{\Large \textbf{\textbf{Function Dynamics}} }
-\end{flushleft}
-We begin by setting up the function dynamics, \lstinline!problem.func.dynamics!, as explained in the \textbf{Model} section above: 
+\subsubsection{Function Dynamics}
+The simulations begins by setting up the function dynamics, \lstinline!problem.func.dynamics!, as explained in the \textbf{Model} section above: 
 \begin{quote}
 \begin{lstlisting}
 syms xdot x zdot z theta w thrust real
@@ -125,12 +123,8 @@ problem.func.dynamics= @(t,x,u) numf( x(1,:),x(2,:),x(3,:),x(4,:),x(5,:),
 \end{lstlisting}
 \end{quote}
 
-\begin{flushleft}
-{\Large \textbf{\textbf{Problem Bounds}} }
-\end{flushleft}
-
+\subsubsection{Problem Bounds}
 The next step is to set up the \lstinline!problem.func.dynamics!. For the function dynamics, a mass-normalized thrust was chosen to keep the model simple, shown in \textbf{Table 1} below. 
-
 \begin{figure}[H]
 \begin{center}
 \begin{tabular}{ |p{2.5cm}||p{2cm}||p{3cm}| }
@@ -151,10 +145,8 @@ The next step is to set up the \lstinline!problem.func.dynamics!. For the functi
 
 \clearpage
 
-\begin{flushleft}
-{\Large \textbf{\textbf{Cost Function}} }
-\end{flushleft}
-You can optimize for a certain aspect using a cost function. The cost functions for different things are shown below. 
+\subsubsection{Cost Function}
+Using a cost function, an optimized trajectory around any aspect of the simulation can be found. The cost functions available for different variables are shown below. 
 \begin{quote}
 \begin{lstlisting}
 % Input:
@@ -173,11 +165,7 @@ problem.func.pathObj = @(t,x,u)( sum((x(1,:)-x_f).^2,1)
 \end{lstlisting}
 \end{quote}
 
-
-\begin{flushleft}
-{\Large \textbf{\textbf{Initialize Guess}} }
-\end{flushleft}
-
+\subsubsection{Initialize Guess}
 Lastly, before running the solution, the solver must be initialized. This is done with the mandatory \lstinline!problem.guess! struct. Where $x_{i}$ and $x_{f}$ are the desired initial and final states, respectively. Additionally, $u_{i}$ and $u_{f}$ are the desired initial and final input, respectively. 
 
 \begin{figure}[H]
@@ -191,17 +179,10 @@ Lastly, before running the solution, the solver must be initialized. This is don
 \lstinline!problem.guess.control! = [u_{i}, u_{f}] 
 \end{equation*}
 \end{figure}
-\begin{flushleft}
-{\Large \textbf{\textbf{Options}} }
-\end{flushleft}
-
-You can add options using \lstinline!problem.options!, which include amount of details change accuracy settings, and select different solution methods. Different methods include trapezoid, Hermite Simpson, Chebyshev, and the Runge Kutta method.
-\newline
-
-\begin{flushleft}
-{\Large \textbf{\textbf{Solution}} }
-\end{flushleft}
-Finally, to solve, the command \lstinline!soln = optimTraj(problem)! is run. You can then unpack the simulation, save the data, and plot out
+\subsubsection{Options}
+Additional options are available using \lstinline!problem.options!, which include details to change accuracy settings and select different solution methods. Different methods include trapezoid, Hermite Simpson, Chebyshev, and the Runge Kutta method.
+\subsubsection{Solution}
+Finally, running the command \lstinline!soln = optimTraj(problem)! is used to solve. Following this, it is possible to unpack the simulation, save the data, and plot out.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                Analysis                                                                                %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -219,8 +200,15 @@ With the completion of a 2D optimized drone path, plans to enhance the simulatio
 \end{itemize}
 With these immediate goals in mind, an accurate simulation can be created to further test the overarching research initiative.
 % Display list of references in IEEE Transactions format.
-\bibliographystyle{IEEEtran}
-\bibliography{IEEEabrv,references}
+\clearpage
+% Display list of references in IEEE format.
+\begin{thebibliography}{9}
+\bibitem{OptimTraj} 
+MatthewPeterKelly
+\textit{OptimTraj}
+GitHub
+\\\texttt{https://github.com/MatthewPeterKelly/OptimTraj}
+\end{thebibliography}
 
 % End of document (everything after this is ignored)
 \end{document}
