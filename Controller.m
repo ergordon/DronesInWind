@@ -48,7 +48,7 @@ data.funcA = matlabFunction(A);
 data.funcB = matlabFunction(B);
 
 % Initialize LQR matrices
-data.Q = 1000*eye(5);
+data.Q = 350*eye(5);
 data.R = eye(2);
 
 % Trajectory
