@@ -48,7 +48,7 @@ data.funcA = matlabFunction(A);
 data.funcB = matlabFunction(B);
 
 % Initialize LQR matrices
-data.Q = 2000*eye(5);
+data.Q = 1000*eye(5);
 data.R = eye(2);
 
 % Trajectory
@@ -83,11 +83,12 @@ if (data.trajIND<length(data.trajT))
     trajZdot = data.trajZdot(ind);
     trajTheta = data.trajTheta(ind);
 else
-    trajX = data.trajX(ind);
-    trajXdot = data.trajXdot(ind);
-    trajZ = data.trajZ(ind);
-    trajZdot = data.trajZdot(ind);
-    trajTheta = data.trajTheta(ind);
+    data.trajIND = data.trajIND+1;
+    trajX = data.trajX(end);
+    trajXdot = data.trajXdot(end);
+    trajZ = data.trajZ(end);
+    trajZdot = data.trajZdot(end);
+    trajTheta = data.trajTheta(end);
 end
 
 % Linearize
@@ -109,7 +110,7 @@ if abs(sensors.xdot) < data.stationaryVelocityMargin && ...
         abs(sensors.z - data.trajZ(end)) < data.finalPositionMargin && ...
         data.endBool == 0
     data.endBool = 1;
-    data.timeEnd = data.trajT(ind);
+    data.timeEnd = parameters.tStep*ind;
     fprintf('End State Achieved at: %f seconds\n', data.timeEnd)
 end
 end

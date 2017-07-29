@@ -7,7 +7,7 @@ duration = 5;
 xInitial = 0;
 zInitial = 0;
 xFinal = 1;
-zFinal = 1;
+zFinal = 0;
 m = 1;
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -24,8 +24,9 @@ numf = matlabFunction(f,'vars',[x xdot z zdot theta thrust w]);
 
 problem.func.dynamics = @(t,x,u)( numf(x(1,:), x(2,:), x(3,:), x(4,:), ... 
     x(5,:), u(1,:), u(2,:)) );
-problem.func.pathObj = @(t,x,u)( sum((x(1,:)-xFinal).^2,1) + sum((x(3,:)-zFinal).^2,1) );
+%problem.func.pathObj = @(t,x,u)( sum((x(1,:)-xFinal).^2,1) + sum((x(3,:)-zFinal).^2,1) );
 %problem.func.pathObj = @(t,x,u)( sum(u.^2,1) );
+problem.func.bndObj = @(t0,x0,tF,xF)(tF-t0);
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -34,7 +35,7 @@ problem.func.pathObj = @(t,x,u)( sum((x(1,:)-xFinal).^2,1) + sum((x(3,:)-zFinal)
 
 problem.bounds.initialTime.low = 0;
 problem.bounds.initialTime.upp = 0;
-problem.bounds.finalTime.low = duration;
+problem.bounds.finalTime.low = 0;
 problem.bounds.finalTime.upp = duration;
 
 problem.bounds.initialState.low = [xInitial; 0; zInitial; 0; 0];
@@ -81,7 +82,7 @@ soln = optimTraj(problem);
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 
 %%%% Unpack the simulation
-t = linspace(soln.grid.time(1), soln.grid.time(end), duration*50);
+t = linspace(soln.grid.time(1), soln.grid.time(end), soln.grid.time(end)*50);
 x = soln.interp.state(t);
 u = soln.interp.control(t);
 

@@ -13,5 +13,5 @@ plot(t,f)
 xlabel('Time, t')
 %ylabel('m, m/s, rad')
 ylabel('Thrust, N')
-title('5 Second, error minimizing')
+title('5 Second, time optimal')
 grid on
