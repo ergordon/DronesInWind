@@ -82,7 +82,7 @@ process.tStart = 0;
 % - Stop time.
 process.tStop = 5; % MODIFICATION: Runtime
 % - Time step.
-process.tStep = 1/50;
+process.tStep = 1/500;
 % - Names of things to log in datafile, if desired
 process.processdatatolog = {'t','x','xdot','z','zdot','theta'};
 

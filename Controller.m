@@ -100,15 +100,33 @@ end
 % Linearize
 A = data.funcA(trajTheta,trajF);
 B = data.funcB(trajTheta);
-K = lqr(A,B,data.Q,data.R);
+data.K = lqr(A,B,data.Q,data.R);
 
 % Calculate and apply input
 state = [sensors.x; sensors.xdot; sensors.z; sensors.zdot; sensors.theta] - ...
     [trajX; trajXdot; trajZ; trajZdot; trajTheta];
-input = -K*state + [trajW; trajF];
+input = -data.K*state + [trajW; trajF];
 actuators.pitchrate = input(1);
 actuators.thrust = input(2);
 
+% %This section, when turned on, rejects saturated input; however that can
+% %negatively impact analysis, so I'm keeping it off 
+% if input(1) < -parameters.maxpitchrate;
+%     actuators.pitchrate = -parameters.maxpitchrate;
+% elseif input(1) > parameters.maxpitchrate;
+%     actuators.pitchrate = parameters.maxpitchrate;
+% else
+%     actuators.pitchrate = input(1);
+% end
+% if input(2) < 0;
+%     actuators.thrust = 0;
+% elseif input(2) > parameters.maxthrust;
+%     actuators.thrust = parameters.maxthrust;
+% else
+%     actuators.thrust = input(2);
+% end
+
+% Display when the quad has reached the goal state
 if abs(sensors.xdot) < data.stationaryVelocityMargin && ...
         abs(sensors.zdot) < data.stationaryVelocityMargin && ...
         abs(sensors.x - data.trajX(end)) < data.finalPositionMargin && ...

@@ -3,6 +3,7 @@ addpath OptimTraj/
 
 maxPitchRate = 5;
 maxThrust = 15;
+minThrust = 1;
 duration = 5;
 xInitial = 0;
 zInitial = 0;
@@ -10,7 +11,7 @@ xFinal = 1;
 zFinal = 0;
 m = 1;
 g = 9.81;
-timeDensity = 50;
+timeDensity = 500;
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                     Set up function handles                             %
@@ -48,7 +49,7 @@ problem.bounds.finalState.upp = [xFinal; 0; zFinal; 0; 0];
 % problem.bounds.state.low = [-2*dist;-2*pi;-inf;-inf];
 % problem.bounds.state.upp = [2*dist;2*pi;inf;inf];
 
-problem.bounds.control.low = [-maxPitchRate; 0];
+problem.bounds.control.low = [-maxPitchRate; minThrust];
 problem.bounds.control.upp = [maxPitchRate; maxThrust];
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
