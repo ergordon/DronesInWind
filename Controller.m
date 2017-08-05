@@ -59,8 +59,8 @@ data.trajXdot = x(2,:);
 data.trajZ = x(3,:);
 data.trajZdot = x(4,:);
 data.trajTheta = x(5,:);
-data.trajW = u(2,:);
-data.trajF = u(1,:);
+data.trajW = u(1,:);
+data.trajF = u(2,:);
 data.trajIND = 1;
 
 % Analysis variables

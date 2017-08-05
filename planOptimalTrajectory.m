@@ -1,8 +1,8 @@
 clc; clear;
 addpath OptimTraj/
 
-maxThrust = 15;
 maxPitchRate = 5;
+maxThrust = 15;
 duration = 5;
 xInitial = 0;
 zInitial = 0;
@@ -10,6 +10,7 @@ xFinal = 1;
 zFinal = 0;
 m = 1;
 g = 9.81;
+timeDensity = 50;
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                     Set up function handles                             %
@@ -21,7 +22,7 @@ syms x xdot z zdot theta thrust w real
 f = simplify([xdot; (thrust/m)*sin(theta); zdot; ...
     (thrust/m)*cos(theta) - g; w]);
 % Convert EOMs from symbolic to numeric
-numf = matlabFunction(f,'vars',[x xdot z zdot theta thrust w]);
+numf = matlabFunction(f,'vars',[x xdot z zdot theta w thrust]);
 
 problem.func.dynamics = @(t,x,u)( numf(x(1,:), x(2,:), x(3,:), x(4,:), ... 
     x(5,:), u(1,:), u(2,:)) );
@@ -47,8 +48,8 @@ problem.bounds.finalState.upp = [xFinal; 0; zFinal; 0; 0];
 % problem.bounds.state.low = [-2*dist;-2*pi;-inf;-inf];
 % problem.bounds.state.upp = [2*dist;2*pi;inf;inf];
 
-problem.bounds.control.low = [0; -maxPitchRate];
-problem.bounds.control.upp = [maxThrust; maxPitchRate];
+problem.bounds.control.low = [-maxPitchRate; 0];
+problem.bounds.control.upp = [maxPitchRate; maxThrust];
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                    Initial guess at trajectory                          %
@@ -56,7 +57,7 @@ problem.bounds.control.upp = [maxThrust; maxPitchRate];
 
 problem.guess.time = [0,duration];
 problem.guess.state = [problem.bounds.initialState.low, problem.bounds.finalState.low];
-problem.guess.control = [[0; 0],[g; 0]];
+problem.guess.control = [[0; g],[0; g]];
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -83,7 +84,7 @@ soln = optimTraj(problem);
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 
 %%%% Unpack the simulation
-t = linspace(soln.grid.time(1), soln.grid.time(end), soln.grid.time(end)*50);
+t = linspace(soln.grid.time(1), soln.grid.time(end), soln.grid.time(end)*timeDensity);
 x = soln.interp.state(t);
 u = soln.interp.control(t);
 
@@ -93,6 +94,6 @@ plot(t,x);
 legend('x','xdot','z','zdot','theta');
 subplot(2,1,2);
 plot(t,u);
-legend('thrust','pitch rate');
+legend('pitch rate','thrust');
 
 save('traj.mat','t','x','u');
