@@ -4,7 +4,7 @@
 % Load a number of useful packages
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb,amsfonts,amsthm}
- \usepackage[margin=1.0in]{geometry}
+\usepackage[margin=1.0in]{geometry}
 \usepackage[colorlinks=true]{hyperref}
 \usepackage{cite}
 \usepackage[caption=false,font=footnotesize]{subfig}
@@ -30,185 +30,184 @@
 
 % Start of document
 \begin{document}
-
-% Put the title, author, and date at top of first page
-\maketitle
-
-
-\section{Goal}
-The "Drones in Wind" simulation simulates the flight of a quadcopter drone. The drone in the simulation will be modeled after the AscTec Pelican, a research-drone by the German company Ascending Technologies. The simulated drone as of the point of writing this paper is equipped with sensors to measure the velocity in the horizontal and vertical axis, the vertical position and the pitch angle. The goal is to create a controller that linearizes about a trajectory given by the third-party program OptimTraj. The trajectory comes from a cost function that minimizes the time integral of error from a desired position.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                                 Model                                                                                  %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Model}
-The motion of the drone is governed by the ordinary differential equations with the state defined as
-\begin{equation}
-\label{state}
-x = \begin{bmatrix} x\\ \dot{x} \\ z \\ \dot{z} \\ \theta \end{bmatrix}
-\end{equation}
-such that $x$ and $z$ correspond to horizontal and vertical position, respectively, while $\theta$ corresponds to the angle of the quad from upright. The inputs for the system are defined as
-\begin{equation}
-\label{inputs}
-u = \begin{bmatrix} \omega \\ f \end{bmatrix}
-\end{equation}
-such that $\omega$ corresponds to angular pitch rate and $f$ corresponds to thrust. Taking the Jacobian lends the following A and B matrices shown by Equation \ref{A_matrix_intermediate} and Equation \ref{B_matrix_intermediate}
-\begin{equation}
-\label{A_matrix_intermediate}
-A = \begin{bmatrix} 0 && 1 && 0 && 0 && 0 \\ 0 && 0 && 0 && 0 && \frac{f\cos{\theta}}{m} \\  0 && 0 && 0 && 1 && 0 \\ 0 && 0 && 0 && 0 && \frac{-f\sin{\theta}}{m} \\ 0 && 0 && 0 && 0 && 0 \end{bmatrix}
-\end{equation}
-
-\begin{equation}
-\label{B_matrix_intermediate}
-B = \begin{bmatrix} 0 && 0 \\ 0 && \frac{\sin{\theta}}{m} \\ 0 && 0 \\ 0 && \frac{\cos{\theta}}{m} \\ 1 && 0 \end{bmatrix}
-\end{equation}
-Substituting the equilibrium force, $f = mg$, results in the following matrices shown in Equation \ref{A_matrix} and Equation \ref{B_matrix}.
-\begin{equation}
-\label{A_matrix}
-A = \begin{bmatrix} 0 && 1 && 0 && 0 && 0 \\ 0 && 0 && 0 && 0 && g\cos{\theta} \\  0 && 0 && 0 && 1 && 0 \\ 0 && 0 && 0 && 0 && -g\sin{\theta} \\ 0 && 0 && 0 && 0 && 0 \end{bmatrix}
-\end{equation}
-
-\begin{equation}
-\label{B_matrix}
-B = \begin{bmatrix} 0 && 0 \\ 0 && \frac{\sin{\theta}}{m} \\ 0 && 0 \\ 0 && \frac{\cos{\theta}}{m} \\ 1 && 0 \end{bmatrix}
-\end{equation}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                              Controller                                                                               %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Controller and Optimization}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                               Controller                                                                              %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Controller}
-The controller is designed to use in the loop control with LQR to follow a given trajectory. First, the init function creates a symbolic description of the A and B matrices, in which the angle $\theta$ is the only variable.  These symbolic descriptions are then turned into MATLAB functions and saved in the data struct.  The Q and R weight matrices are then initialized.  The init function proceeds to load in the trajectory data and also adds it to the data struct.  Finally, some parameters used to determine when the quad has reached its destination are initialized.
-\newline
-\newline
-Logic is used at the start of the control loop to determine if there is still trajectory data available for the current timestep.  If there is not, the controller will linearize about the last available trajectory point.  This case does not happen in current simulations because the trajectory is planned for the entire duration of the simulation.
-\newline
-\newline
-After determining that the simulation is still within the regime in which a trajectory is available, the controller will find the respective trajectory point to linearize about for the current timestep.  The angle for this trajectory point is passed into the MATLAB functions to determine the relevant A and B matrices, which are then used in conjunction with the already initialized weights to create a gain matrix using LQR.
-\newline
-\newline
-Finally, the input $u = -Kx$ is applied in which $u$ is a column of two inputs, the first being thrust and the second being pitch rate.  Note here that the thrust is augmented by the equilibrium condition for hover, $f = mg$.  K is the previously specified gain matrix, and x is the difference between the current state and the trajectory state at the current time.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                               OptimTraj                                                                             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{OptimTraj}
-
-OptimTraj \cite{OptimTraj} was used for trajectory planning. OptiTraj is a MATLAB library designed by a Cornell PHD student, Matthew P. Kelly, to solve for continuous-time single-phase trajectory optimization problems. For OptimTraj to solve the optimal trajectory, you must specify various parameters of your problem, including:
-\begin{itemize}
-  \item Dynamics
-  \item Objective function
-  \item Bounds
-  \item Initial trajectory guesses
-\end{itemize}
-
-\subsubsection{Function Dynamics}
-The simulations begins by setting up the function dynamics, \lstinline!problem.func.dynamics!, as explained in the \textbf{Model} section above: 
-\begin{quote}
-\begin{lstlisting}
-syms xdot x zdot z theta w thrust real
-EOMs= [xdot;
-       (thrust/mass)*sin(theta);
-       zdot;
-       (thrust/mass)*cos(theta)-gravity;
-       w];
-
-numf = matlabFunction(EOMs,'vars',[x xdot z zdot theta w thrust]);
-problem.func.dynamics= @(t,x,u) numf( x(1,:),x(2,:),x(3,:),x(4,:),x(5,:),
-                                      u(1,:), u(2,:)) );
-
-\end{lstlisting}
-\end{quote}
-
-\subsubsection{Problem Bounds}
-The next step is to set up the \lstinline!problem.func.dynamics!. For the function dynamics, a mass-normalized thrust was chosen to keep the model simple, shown in \textbf{Table 1} below. 
-\begin{figure}[H]
-\begin{center}
-\begin{tabular}{ |p{2.5cm}||p{2cm}||p{3cm}| }
- \hline
- \multicolumn{3}{|c|}{\textbf{Table 1}   Problem Bounds} \\
- \hline
- Parameter & Value & Description\\
- \hline
- $t_{i}$   & 0 s  & Initial time\\
- $t_{f}$  & 5 s  & Final time\\
- $\underline{F}/m$ & 0 m/$s^{2}$ & Min thrust\\
- $\overline{F}/m$ & 15 m/$s^{2}$ & Max thrust\\
- $\overline{\omega}$ & 5 rad/s & Max pitch rate \\
- \hline
-\end{tabular}
-\end{center}
-\end{figure}
-
-\clearpage
-
-\subsubsection{Cost Function}
-Using a cost function, an optimized trajectory around any aspect of the simulation can be found. The cost functions available for different variables are shown below. 
-\begin{quote}
-\begin{lstlisting}
-% Input:
-problem.func.pathObj = @(t,x,u)( sum(u.^2,1) );
-
-% Thrust:
-problem.func.pathObj = @(t,x,u)( sum(u(2,:).^2,1) );
-
-% Pitch Rate:
-problem.func.pathObj = @(t,x,u)( sum(u(1,:).^2,1) );
-
-% time
-problem.func.pathObj = @(t,x,u)( sum((x(1,:)-x_f).^2,1) 
-                                +sum((x(3,:)-z_f).^2,1))
-
-\end{lstlisting}
-\end{quote}
-
-\subsubsection{Initialize Guess}
-Lastly, before running the solution, the solver must be initialized. This is done with the mandatory \lstinline!problem.guess! struct. Where $x_{i}$ and $x_{f}$ are the desired initial and final states, respectively. Additionally, $u_{i}$ and $u_{f}$ are the desired initial and final input, respectively. 
-
-\begin{figure}[H]
-\begin{equation*}
-\lstinline!problem.guess.time! = [t_{i}, t_{f}]
-\end{equation*}
-\begin{equation*}
-\lstinline!problem.guess.state! = [x_{i}, x_{f}]
-\end{equation*}
-\begin{equation*}
-\lstinline!problem.guess.control! = [u_{i}, u_{f}] 
-\end{equation*}
-\end{figure}
-\subsubsection{Options}
-Additional options are available using \lstinline!problem.options!, which include details to change accuracy settings and select different solution methods. Different methods include trapezoid, Hermite Simpson, Chebyshev, and the Runge Kutta method.
-\subsubsection{Solution}
-Finally, running the command \lstinline!soln = optimTraj(problem)! is used to solve. Following this, it is possible to unpack the simulation, save the data, and plot out.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                                Analysis                                                                                %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Analysis}
-A method that computes quadcopter trajectories satisfying the minimal principle with respect to time-optimality has been developed. The method is based on the two-dimensional quadcopter model with an optimal trajectory created using OptimTraj. By defining the dynamics, bounds and cost function the algorithm was able to create an optimal path for which the drone was to follow. Testing this method, the simulated drone accomplished moving from a position (0,0) to (1,1) in a time optimal manner.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                                Future Work                                                                         %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Future Work}
-With the completion of a 2D optimized drone path, plans to enhance the simulation are underway. Several additions will be added to the current simulation in order to complete this task. Those are as follows 
-\newline
-\begin{itemize}
-  \item Implement 3D rigid body dynamics
-  \item Implement additional aerodynamic forces such as drag and ground effect
-\end{itemize}
-With these immediate goals in mind, an accurate simulation can be created to further test the overarching research initiative.
-% Display list of references in IEEE Transactions format.
-\clearpage
-% Display list of references in IEEE format.
-\begin{thebibliography}{9}
-\bibitem{OptimTraj} 
-MatthewPeterKelly
-\textit{OptimTraj}
-GitHub
-\\\texttt{https://github.com/MatthewPeterKelly/OptimTraj}
-\end{thebibliography}
-
-% End of document (everything after this is ignored)
+	
+	% Put the title, author, and date at top of first page
+	\maketitle
+	
+	
+	\section{Goal}
+	The "Drones in Wind" simulation simulates the flight of a quadcopter drone. The drone in the simulation will be modeled after the AscTec Pelican, a research-drone by the German company Ascending Technologies. The simulated drone as of the point of writing this paper is equipped with sensors to measure the velocity in the horizontal and vertical axis, the vertical position and the pitch angle. The goal is to create a controller that linearizes about a trajectory given by the third-party program OptimTraj. The trajectory comes from a cost function that minimizes the time integral of error from a desired position.
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%                                                                                 Model                                                                                  %
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\section{Model}
+	The motion of the drone is governed by the ordinary differential equations with the state defined as
+	\begin{equation}
+		\label{state}
+		x = \begin{bmatrix} x\\ \dot{x} \\ z \\ \dot{z} \\ \theta \end{bmatrix}
+	\end{equation}
+	such that $x$ and $z$ correspond to horizontal and vertical position, respectively, while $\theta$ corresponds to the angle of the quad from upright. The inputs for the system are defined as
+	\begin{equation}
+		\label{inputs}
+		u = \begin{bmatrix} \omega \\ f \end{bmatrix}
+	\end{equation}
+	such that $\omega$ corresponds to angular pitch rate and $f$ corresponds to thrust.  The equations of motion for the system are
+	\begin{align*}
+		\dot{x} &= \dot{x} \\
+		\ddot{x} &= \frac{f}{m}\sin\theta \\
+		\dot{z} &= \dot{z} \\
+		\ddot{z} &= \frac{f}{m}\cos\theta - g\\
+		\dot{\theta} &= \omega.
+	\end{align*}
+	Taking the Jacobian lends the following A and B matrices 
+	\begin{equation}
+		\label{A_matrix}
+		A = \begin{bmatrix} 0 && 1 && 0 && 0 && 0 \\ 0 && 0 && 0 && 0 && \frac{f\cos{\theta}}{m} \\  0 && 0 && 0 && 1 && 0 \\ 0 && 0 && 0 && 0 && \frac{-f\sin{\theta}}{m} \\ 0 && 0 && 0 && 0 && 0 \end{bmatrix}
+	\end{equation}
+	
+	\begin{equation}
+		\label{B_matrix}
+		B = \begin{bmatrix} 0 && 0 \\ 0 && \frac{\sin{\theta}}{m} \\ 0 && 0 \\ 0 && \frac{\cos{\theta}}{m} \\ 1 && 0 \end{bmatrix}
+	\end{equation}
+	
+	Which completes the linearized system.
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%                                                                              Controller                                                                               %
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\section{Controller and Optimization}
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%                                                                               Controller                                                                              %
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\subsection{Controller}
+	The controller is designed to use in the loop control with LQR to follow a given trajectory. First, the init function creates a symbolic description of the A and B matrices.  These symbolic descriptions are then turned into MATLAB functions and saved in the data struct.  The Q and R weight matrices are then initialized.  The init function proceeds to load in the trajectory data and also adds it to the data struct.  Finally, some parameters used to determine when the quad has reached its destination are initialized.
+	\newline
+	\newline
+	Logic is used at the start of the control loop to determine if there is still trajectory data available for the current timestep.  If there is not, the controller will use the last available trajectory point for the state.  The pitchrate and thrust will be set to $\omega = 0$ and $f = mg$, respectively.  The reason that we cannot simply use the last available trajectory point for $\omega$ and $f$ is that the trajectory frequently does not end with the equilibrium input.
+	\newline
+	\newline
+	After determining that the simulation is still within the regime in which a trajectory is available, the controller will find the respective trajectory point to linearize about for the current timestep.  The angle for this trajectory point is passed into the MATLAB functions to determine the relevant A and B matrices, which are then used in conjunction with the already initialized weights to create a gain matrix using LQR.
+	\newline
+	\newline
+	Finally, the input $u = -Kx + n$ is applied in which $u$ and $n$ are the input to be applied and the trajectory input at the current time, respectively.  K is the previously specified gain matrix, and x is the difference between the current state and the trajectory state at the current time.
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%                                                                               OptimTraj                                                                             %
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\subsection{OptimTraj}
+	
+	OptimTraj \cite{OptimTraj} was used for trajectory planning. OptiTraj is a MATLAB library designed by a Cornell PHD student, Matthew P. Kelly, to solve for continuous-time single-phase trajectory optimization problems. For OptimTraj to solve the optimal trajectory, you must specify various parameters of your problem, including:
+	\begin{itemize}
+		\item Dynamics
+		\item Objective function
+		\item Bounds
+		\item Initial trajectory guesses
+	\end{itemize}
+	
+	\subsubsection{Function Dynamics}
+	The simulations begins by setting up the function dynamics, \lstinline!problem.func.dynamics!, as explained in the \textbf{Model} section above: 
+	\begin{quote}
+		\begin{lstlisting}
+		syms xdot x zdot z theta w thrust real
+		EOMs= [xdot;
+		(thrust/mass)*sin(theta);
+		zdot;
+		(thrust/mass)*cos(theta)-gravity;
+		w];
+		
+		numf = matlabFunction(EOMs,'vars',[x xdot z zdot theta w thrust]);
+		problem.func.dynamics= @(t,x,u) numf( x(1,:),x(2,:),x(3,:),x(4,:),x(5,:),
+		u(1,:), u(2,:)) );
+		
+		\end{lstlisting}
+	\end{quote}
+	
+	\subsubsection{Problem Bounds}
+	The next step is to set up the \lstinline!problem.func.dynamics!. For the function dynamics, a mass-normalized thrust was chosen to keep the model simple, shown in \textbf{Table 1} below. 
+	\begin{figure}[H]
+		\begin{center}
+			\begin{tabular}{ |p{2.5cm}||p{2cm}||p{3cm}| }
+				\hline
+				\multicolumn{3}{|c|}{\textbf{Table 1}   Problem Bounds} \\
+				\hline
+				Parameter & Value & Description\\
+				\hline
+				$t_{i}$   & 0 s  & Initial time\\
+				$t_{f}$  & 5 s  & Final time\\
+				$\underline{F}/m$ & 0 m/$s^{2}$ & Min thrust\\
+				$\overline{F}/m$ & 15 m/$s^{2}$ & Max thrust\\
+				$\overline{\omega}$ & 5 rad/s & Max pitch rate \\
+				\hline
+			\end{tabular}
+		\end{center}
+	\end{figure}
+	
+	\clearpage
+	
+	\subsubsection{Cost Function}
+	Using a cost function, an optimized trajectory around any aspect of the simulation can be found. The cost functions available for different variables are shown below. 
+	\begin{quote}
+		\begin{lstlisting}
+		% Input:
+		problem.func.pathObj = @(t,x,u)( sum(u.^2,1) );
+		
+		% Thrust:
+		problem.func.pathObj = @(t,x,u)( sum(u(2,:).^2,1) );
+		
+		% Pitch Rate:
+		problem.func.pathObj = @(t,x,u)( sum(u(1,:).^2,1) );
+		
+		% time
+		problem.func.pathObj = @(t,x,u)( sum((x(1,:)-x_f).^2,1) 
+		+sum((x(3,:)-z_f).^2,1))
+		
+		\end{lstlisting}
+	\end{quote}
+	
+	\subsubsection{Initialize Guess}
+	Lastly, before running the solution, the solver must be initialized. This is done with the mandatory \lstinline!problem.guess! struct. Where $x_{i}$ and $x_{f}$ are the desired initial and final states, respectively. Additionally, $u_{i}$ and $u_{f}$ are the desired initial and final input, respectively. 
+	
+	\begin{figure}[H]
+		\begin{equation*}
+			\lstinline!problem.guess.time! = [t_{i}, t_{f}]
+		\end{equation*}
+		\begin{equation*}
+			\lstinline!problem.guess.state! = [x_{i}, x_{f}]
+		\end{equation*}
+		\begin{equation*}
+			\lstinline!problem.guess.control! = [u_{i}, u_{f}] 
+		\end{equation*}
+	\end{figure}
+	\subsubsection{Options}
+	Additional options are available using \lstinline!problem.options!, which include details to change accuracy settings and select different solution methods. Different methods include trapezoid, Hermite Simpson, Chebyshev, and the Runge Kutta method.
+	\subsubsection{Solution}
+	Finally, running the command \lstinline!soln = optimTraj(problem)! is used to solve. Following this, it is possible to unpack the simulation, save the data, and plot out.
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%                                                                                Analysis                                                                                %
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\section{Analysis}
+	A method that computes quadcopter trajectories satisfying the minimal principle with respect to time-optimality has been developed. The method is based on the two-dimensional quadcopter model with an optimal trajectory created using OptimTraj. By defining the dynamics, bounds and cost function the algorithm was able to create an optimal path for which the drone was to follow. Testing this method, the simulated drone accomplished moving from a position (0,0) to (1,1) in a time optimal manner.
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%                                                                                Future Work                                                                         %
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\section{Future Work}
+	With the completion of a 2D optimized drone path, plans to enhance the simulation are underway. Several additions will be added to the current simulation in order to complete this task. Those are as follows 
+	\newline
+	\begin{itemize}
+		\item Implement 3D rigid body dynamics
+		\item Implement additional aerodynamic forces such as drag and ground effect
+	\end{itemize}
+	With these immediate goals in mind, an accurate simulation can be created to further test the overarching research initiative.
+	% Display list of references in IEEE Transactions format.
+	\clearpage
+	% Display list of references in IEEE format.
+	\begin{thebibliography}{9}
+		\bibitem{OptimTraj} 
+		MatthewPeterKelly
+		\textit{OptimTraj}
+		GitHub
+		\\\texttt{https://github.com/MatthewPeterKelly/OptimTraj}
+	\end{thebibliography}
+	
+	% End of document (everything after this is ignored)
 \end{document}
