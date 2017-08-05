@@ -1,17 +1,14 @@
 clc; clear;
 addpath OptimTraj/
+load('runOptions')
 
 maxPitchRate = 5;
 maxThrust = 15;
 minThrust = 1;
-duration = 5;
 xInitial = 0;
 zInitial = 0;
-xFinal = 1;
-zFinal = 0;
 m = 1;
 g = 9.81;
-timeDensity = 500;
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                     Set up function handles                             %
@@ -39,7 +36,7 @@ problem.func.bndObj = @(t0,x0,tF,xF)(tF-t0);
 problem.bounds.initialTime.low = 0;
 problem.bounds.initialTime.upp = 0;
 problem.bounds.finalTime.low = 0;
-problem.bounds.finalTime.upp = duration;
+problem.bounds.finalTime.upp = runTime;
 
 problem.bounds.initialState.low = [xInitial; 0; zInitial; 0; 0];
 problem.bounds.initialState.upp = [xInitial; 0; zInitial; 0; 0];
@@ -56,7 +53,7 @@ problem.bounds.control.upp = [maxPitchRate; maxThrust];
 %                    Initial guess at trajectory                          %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 
-problem.guess.time = [0,duration];
+problem.guess.time = [0,runTime];
 problem.guess.state = [problem.bounds.initialState.low, problem.bounds.finalState.low];
 problem.guess.control = [[0; g],[0; g]];
 

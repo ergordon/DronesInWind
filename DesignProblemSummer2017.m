@@ -74,15 +74,16 @@ end
 
 function [process,controller] = SetupSimulation(process)
 
+load('runOptions')
 % DEFINE CONSTANTS
 
 % Constants related to simulation.
 % - State time.
 process.tStart = 0;
 % - Stop time.
-process.tStop = 5; % MODIFICATION: Runtime
+process.tStop = runTime; % MODIFICATION: Runtime
 % - Time step.
-process.tStep = 1/500;
+process.tStep = 1/timeDensity; % MODIFICATION: Timestep
 % - Names of things to log in datafile, if desired
 process.processdatatolog = {'t','x','xdot','z','zdot','theta'};
 
