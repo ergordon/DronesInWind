@@ -33,12 +33,12 @@ end
 
 function [actuators,data] = initControlSystem(sensors,references,parameters,data)
 
-% Current angle of the quad (this will be passed in from the run function)
-syms ANG real
+% Current angle of the quad and current thrust (this will be passed in from the run function)
+syms ANG THRUST real
 
 % Symbolic description of A matrix
-A = [0 1 0 0 0; 0 0 0 0 parameters.g*cos(ANG); 0 0 0 1 0; ...
-    0 0 0 0 -parameters.g*sin(ANG); 0 0 0 0 0];
+A = [0 1 0 0 0; 0 0 0 0 THRUST*cos(ANG)/parameters.m; 0 0 0 1 0; ...
+    0 0 0 0 -THRUST*sin(ANG)/parameters.m; 0 0 0 0 0];
 
 % Symbolic description of B matrix
 B = [0 0; 0 sin(ANG)/parameters.m; 0 0; 0 cos(ANG)/parameters.m; 1 0];
@@ -48,7 +48,7 @@ data.funcA = matlabFunction(A);
 data.funcB = matlabFunction(B);
 
 % Initialize LQR matrices
-data.Q = 350*eye(5);
+data.Q = 700*eye(5);
 data.R = eye(2);
 
 % Trajectory
@@ -59,6 +59,8 @@ data.trajXdot = x(2,:);
 data.trajZ = x(3,:);
 data.trajZdot = x(4,:);
 data.trajTheta = x(5,:);
+data.trajW = u(2,:);
+data.trajF = u(1,:);
 data.trajIND = 1;
 
 % Analysis variables
@@ -82,6 +84,8 @@ if (data.trajIND<length(data.trajT))
     trajZ = data.trajZ(ind);
     trajZdot = data.trajZdot(ind);
     trajTheta = data.trajTheta(ind);
+    trajW = data.trajW(ind);
+    trajF = data.trajF(ind);
 else
     data.trajIND = data.trajIND+1;
     trajX = data.trajX(end);
@@ -89,20 +93,21 @@ else
     trajZ = data.trajZ(end);
     trajZdot = data.trajZdot(end);
     trajTheta = data.trajTheta(end);
+    trajW = 0;
+    trajF = parameters.m * parameters.g;
 end
 
 % Linearize
-ANG = trajTheta;
-A = data.funcA(ANG);
-B = data.funcB(ANG);
+A = data.funcA(trajTheta,trajF);
+B = data.funcB(trajTheta);
 K = lqr(A,B,data.Q,data.R);
 
 % Calculate and apply input
 state = [sensors.x; sensors.xdot; sensors.z; sensors.zdot; sensors.theta] - ...
     [trajX; trajXdot; trajZ; trajZdot; trajTheta];
-input = -K*state;
+input = -K*state + [trajW; trajF];
 actuators.pitchrate = input(1);
-actuators.thrust = input(2) + parameters.g*parameters.m;
+actuators.thrust = input(2);
 
 if abs(sensors.xdot) < data.stationaryVelocityMargin && ...
         abs(sensors.zdot) < data.stationaryVelocityMargin && ...

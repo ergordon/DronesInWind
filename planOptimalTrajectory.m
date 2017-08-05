@@ -9,6 +9,7 @@ zInitial = 0;
 xFinal = 1;
 zFinal = 0;
 m = 1;
+g = 9.81;
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                     Set up function handles                             %
@@ -18,7 +19,7 @@ m = 1;
 % Put symbolic EOMs in convenient form
 syms x xdot z zdot theta thrust w real
 f = simplify([xdot; (thrust/m)*sin(theta); zdot; ...
-    (thrust/m)*cos(theta) - 9.81; w]);
+    (thrust/m)*cos(theta) - g; w]);
 % Convert EOMs from symbolic to numeric
 numf = matlabFunction(f,'vars',[x xdot z zdot theta thrust w]);
 
@@ -55,7 +56,7 @@ problem.bounds.control.upp = [maxThrust; maxPitchRate];
 
 problem.guess.time = [0,duration];
 problem.guess.state = [problem.bounds.initialState.low, problem.bounds.finalState.low];
-problem.guess.control = [[0; 0],[0; 0]];
+problem.guess.control = [[0; 0],[g; 0]];
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
