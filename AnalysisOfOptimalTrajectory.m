@@ -1,5 +1,5 @@
 function AnalysisOfOptimalTrajectory
-
+close all
 load traj
 topt = t;
 xopt = x;
@@ -22,18 +22,20 @@ hold on;
 for i=1:size(xopt,1)
     plot(tsim,xsim(i,:),'--','color',colorList(i,:));
 end
+title('Quadcoper State')
 legend('x','xdot','z','zdot','theta');
 grid on
 % To here
 
-figure(2)
 % Comment from here (Input)
+figure(2)
 plot(topt,uopt,'-','linewidth',1);
 hold on;
 for i=1:size(uopt,1)
     plot(tsim,usim(i,:),'--','color',colorList(i,:));
 end
 legend('pitchrate','thrust');
+title('Quadcopter Inputs')
 grid on
 % To here
 
