@@ -89,13 +89,15 @@ process.processdatatolog = {'t','x','xdot','z','zdot','theta'};
 
 % Constants related to physical properties.
 % - Acceleration of gravity.
-process.g = 9.81;
+process.g = gravity;
 % - Mass
-process.m = 1.0;
+process.m = mass;
 % - Maximum thrust
-process.maxthrust = 15;
+process.maxthrust = maxThrust;
+% - Minimum thrust
+process.minthrust = minThrust;
 % - Maximum pitch rate
-process.maxpitchrate = 5;
+process.maxpitchrate = maxPitchRate;
 % - Geometry
 process.sparLength = 0.5;
 process.sparWidth = 0.01;
@@ -192,18 +194,18 @@ u = [actuators.pitchrate; actuators.thrust];
 u = zeros(2,1);
 
 % Copy pitch rate from actuators
-if actuators.pitchrate<-process.maxpitchrate
+if actuators.pitchrate < -process.maxpitchrate
     u(1) = -process.maxpitchrate;
-elseif actuators.pitchrate>process.maxpitchrate
+elseif actuators.pitchrate > process.maxpitchrate
     u(1) = process.maxpitchrate;
 else
     u(1) = actuators.pitchrate;
 end
 
 % Copy thrust from actuators
-if actuators.thrust<0
-    u(2) = 0;
-elseif actuators.thrust>process.maxthrust
+if actuators.thrust<process.minthrust
+    u(2) = process.minthrust;
+elseif actuators.thrust > process.maxthrust
     u(2) = process.maxthrust;
 else
     u(2) = actuators.thrust;

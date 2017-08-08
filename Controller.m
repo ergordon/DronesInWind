@@ -37,18 +37,24 @@ function [actuators,data] = initControlSystem(sensors,references,parameters,data
 syms ANG THRUST real
 
 % Symbolic description of A matrix
-A = [0 1 0 0 0; 0 0 0 0 THRUST*cos(ANG)/parameters.m; 0 0 0 1 0; ...
-    0 0 0 0 -THRUST*sin(ANG)/parameters.m; 0 0 0 0 0];
+A = [0 1 0 0 0; 
+     0 0 0 0 THRUST*cos(ANG)/parameters.m; 
+     0 0 0 1 0; 
+     0 0 0 0 -THRUST*sin(ANG)/parameters.m; 
+     0 0 0 0 0];
 
 % Symbolic description of B matrix
-B = [0 0; 0 sin(ANG)/parameters.m; 0 0; 0 cos(ANG)/parameters.m; 1 0];
+B = [0 0; 
+     0 sin(ANG)/parameters.m; 
+     0 0; 0 cos(ANG)/parameters.m; 
+     1 0];
 
 % Create functions
 data.funcA = matlabFunction(A);
 data.funcB = matlabFunction(B);
 
 % Initialize LQR matrices
-data.Q = 700*eye(5);
+data.Q = 200*eye(5);
 data.R = eye(2);
 
 % Trajectory
@@ -61,12 +67,17 @@ data.trajZdot = x(4,:);
 data.trajTheta = x(5,:);
 data.trajW = u(1,:);
 data.trajF = u(2,:);
-data.trajIND = 1;
+data.index = 1;
+
+load('runOPtions.mat')
+data.minThrust = minThrust;
+data.maxThrust = maxThrust;
+data.maxPitchRate = maxPitchRate;
 
 % Analysis variables
-data.stationaryVelocityMargin = .01; % Required velocity from rest (for both x and z)
-data.finalPositionMargin = .01; % Required distance from final position (for both x and z)
-data.endBool = 0; % Used to only display the end time once
+data.vel_error = .05;  % Required velocity from rest (for both x and z)
+data.pos_error = .05;  % Required distance from final position (for both x and z)
+data.endBool = 0;      % Used to only display the end time once
 
 % Run the controller
 [actuators,data] = runControlSystem(sensors,references,parameters,data);
@@ -76,9 +87,10 @@ end
 function [actuators,data] = runControlSystem(sensors,references,parameters,data)
 
 % Reference trajectory
-ind = data.trajIND;
-if (data.trajIND<length(data.trajT))
-    data.trajIND = data.trajIND+1;
+ind = data.index;
+if data.index < length(data.trajT)
+    data.index = data.index + 1;
+    
     trajX = data.trajX(ind);
     trajXdot = data.trajXdot(ind);
     trajZ = data.trajZ(ind);
@@ -87,12 +99,13 @@ if (data.trajIND<length(data.trajT))
     trajW = data.trajW(ind);
     trajF = data.trajF(ind);
 else
-    data.trajIND = data.trajIND+1;
+    data.index = data.index+1;
     trajX = data.trajX(end);
     trajXdot = data.trajXdot(end);
     trajZ = data.trajZ(end);
     trajZdot = data.trajZdot(end);
     trajTheta = data.trajTheta(end);
+    
     trajW = 0;
     trajF = parameters.m * parameters.g;
 end
@@ -103,37 +116,48 @@ B = data.funcB(trajTheta);
 data.K = lqr(A,B,data.Q,data.R);
 
 % Calculate and apply input
-state = [sensors.x; sensors.xdot; sensors.z; sensors.zdot; sensors.theta] - ...
-    [trajX; trajXdot; trajZ; trajZdot; trajTheta];
+state = [sensors.x - trajX; 
+         sensors.xdot - trajXdot; 
+         sensors.z - trajZ; 
+         sensors.zdot - trajZdot; 
+         sensors.theta - trajTheta];
+     
 input = -data.K*state + [trajW; trajF];
+
+%~~ Correctly plot inputs (Regulated in DesignProblem, but not recorded)~~
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Regulate Pitch Rate
+if input(1) < -data.maxPitchRate
+    input(1) = -data.maxPitchRate;
+elseif input(1) > data.maxPitchRate
+    input(1) = data.maxPitchRate;
+else
+    input(1) = input(1);
+end
+
+% Regulate Thrust
+if input(2) < data.minThrust
+    input(2) = data.minThrust;
+elseif input(2) > data.maxThrust
+    input(2) = data.maxThrust;
+else
+    input(2) = input(2);
+end
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 actuators.pitchrate = input(1);
 actuators.thrust = input(2);
 
-% %This section, when turned on, rejects saturated input; however that can
-% %negatively impact analysis, so I'm keeping it off 
-% if input(1) < -parameters.maxpitchrate;
-%     actuators.pitchrate = -parameters.maxpitchrate;
-% elseif input(1) > parameters.maxpitchrate;
-%     actuators.pitchrate = parameters.maxpitchrate;
-% else
-%     actuators.pitchrate = input(1);
-% end
-% if input(2) < 0;
-%     actuators.thrust = 0;
-% elseif input(2) > parameters.maxthrust;
-%     actuators.thrust = parameters.maxthrust;
-% else
-%     actuators.thrust = input(2);
-% end
 
 % Display when the quad has reached the goal state
-if abs(sensors.xdot) < data.stationaryVelocityMargin && ...
-        abs(sensors.zdot) < data.stationaryVelocityMargin && ...
-        abs(sensors.x - data.trajX(end)) < data.finalPositionMargin && ...
-        abs(sensors.z - data.trajZ(end)) < data.finalPositionMargin && ...
+if abs(sensors.xdot) < data.vel_error && ...
+        abs(sensors.zdot) < data.vel_error && ...
+        abs(sensors.x - data.trajX(end)) < data.pos_error && ...
+        abs(sensors.z - data.trajZ(end)) < data.pos_error && ...
         data.endBool == 0
     data.endBool = 1;
     data.timeEnd = parameters.tStep*ind;
     fprintf('End State Achieved at: %f seconds\n', data.timeEnd)
+    
 end
 end
