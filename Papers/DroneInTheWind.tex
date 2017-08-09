@@ -276,52 +276,51 @@ AnalysisOfOptimalTrajectory()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Analysis of Optimal Trajectory}
 
-OptimTraj  was used to find the time-optimal trajectory for 5 different paths, all starting at the origin. 
-Namely, the 5 paths ended at (1,1), (2,2), (3,3), (4,4), and (5,5). This is so that we can see how the model actually changes behaviors over these different paths. Ultimately, the results will be compared to \textbf{one} of D'Andrea's results \textcolor{red}{Citation Needed}, which took the path from (0,0) to (5,5).  All plots will be shown alongside D'Andrea's for comparison. 
+In this section, the trajectory for $x=5,z=5$ was analyzed. First the Optimal trajectory was calculated and saved, then the simulation was run and data stored, and finally both results were plotted against each other. To reiterate, \textbf{Solid lines} are to show the optimal trajectory, and \textbf{dashed lines} show the simulated quad-rotor path.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                                OptimTraj  Analysis                                                                         %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{OptimTraj Analysis}
-\begin{quote}
-\begin{lstlisting}
-load('traj.mat')
-t = t;
-x = x(1,:);
-xd= x(2,:);
-z = x(3,:);
-zd= x(4,:);
-th= x(5,:);
-w = u(1,:);
-f = u(2,:);
-\end{lstlisting}
-\end{quote}
-The values for all 5 instances were unpacked and subsequently plotted over time.
+Ultimately, the results will be compared to \textbf{one} of D'Andrea's results \textcolor{red}{Citation Needed}. 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                Simulation Analysis                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Simulation Analysis}
 \begin{quote}
 \begin{lstlisting}
-load('data1.mat')
-t = processdata.t;
-x = processdata.x;
-xd = processdata.xdot;
-z = processdata.z;
-zd = processdata.zdot;
-th = processdata.theta;
-f = controllerdata.actuators.thrust;
-w = controllerdata.actuators.pitchrate;
+load traj
+topt = t;
+xopt = x;
+uopt = u;
+
+load data
+tsim = processdata.t;
+xsim = [processdata.x; processdata.xdot; processdata.z; processdata.zdot;    processdata.theta];
+usim = [controllerdata.actuators.pitchrate;...
+	controllerdata.actuators.thrust];
 \end{lstlisting}
 \end{quote}
-Similarly, the simulations were also unpacked and plotted over time.
+The preceding lines of code are meant to show how easily the data can be unpacked and plotted against each other. Below, \textcolor{blue}{\textbf{Figure X} shows the optimal and actual state of the quadrotor and \textbf{figure Y} shows the optimal and actual inputs of the quadrotor.}
 
+
+\begin{figure}[h!]
+  \centering
+  \begin{minipage}[b]{0.45\textwidth}
+    \includegraphics[width=\textwidth]{State.png}
+    \caption{Quadcopter state over time.}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.45\textwidth}
+    \includegraphics[width=\textwidth]{Inputs.png}
+    \caption{Quadcopter Inputs over time.}
+  \end{minipage}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                              D'Andrea Results                                                                        %
+%                                                          Comparison with D'Andrea Results                %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{D'Andrea Results}
+\subsection{Comparison with D'Andrea Results}
+
+We can compare the simulated trajectory with that of \textit{Performance benchmarking of quadrotor systems using time-optimal control}. \textcolor{red}{Citation} 
 
 Before comparing results to D'Andrea's of time optimal trajectory results, the differences in simulations must be addressed. To start, D'Andrea's control input is bang-bang in thrust and bang-singular in pitch rate.\textcolor{red}{Citation Needed}. Additionally, those inputs are non-zero values at both the start and end. Whereas our controller is continuous(\textcolor{red}{???}) and the inputs both begin at zero values. The plot for his results are shown in figure \textcolor{red}{X} below. 
 \begin{figure}[H]
