@@ -11,6 +11,7 @@
 \usepackage{float}
 \usepackage{float}
 \usepackage{enumitem}
+\usepackage[export]{adjustbox}
 \setlist{nosep,after=\vspace{\baselineskip}}
 % Two more packages that make it easy to show MATLAB code
 \usepackage[T1]{fontenc}
@@ -114,7 +115,7 @@ problem.func.dynamics= @(t,x,u) numf( x(1,:),x(2,:),x(3,:),x(4,:),x(5,:),
 \end{quote}
 
 \subsubsection{Problem Bounds}
-The next step is to set up the \lstinline!problem.bounds!. For the function dynamics, a mass-normalized thrust was chosen to keep the model simple, shown in \textbf{Table 1} below. These parameters were chosen so that results of the simulation can be compared to D'Andrea's paper, \textit{Performance benchmarking of quadrotor systems using time-optimal control}.  \textcolor{red}{Citation}
+The next step is to set up the \lstinline!problem.bounds!. For the function dynamics, a mass-normalized thrust was chosen to keep the model simple, shown in \textbf{Table 1} below. These parameters were chosen so that results of the simulation can be compared to results from D'Andrea's paper\cite{D'Andrea}.
 \begin{figure}[H]
 \begin{center}
 \begin{tabular}{ |p{2.5cm}||p{2cm}||p{3cm}| }
@@ -185,7 +186,7 @@ save('traj.mat','t','x','u');
 \end{lstlisting}
 \end{quote}
 
-The reason the time grid-spacing is the end-time multiplied by \lstinline!TimeDesnity! is to keep the grid-spacing of the simulation and optimal trajectory path the same. This will be elaborated on a further in \textcolor{red}{Section 4, \textbf{Running Simulation}}
+The reason the time grid-spacing is the end-time multiplied by \lstinline!TimeDesnity! is to keep the grid-spacing of the simulation and optimal trajectory path the same. This will be elaborated on a further in Section \ref{Running Simulation}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                               Controller                                                                              %
@@ -238,7 +239,7 @@ Finally, the input $u = -Kx$ is applied in which $u$ is a column of two inputs, 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                         Running Simulation                                                                                %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Running Simulation}
+\section{Running Simulation}\label{Running Simulation}
 
 To run the simulation, a function named \lstinline!automation.m! was used to set up the problem bounds, plan the optimal trajectory, and analyze the results. Below is shown the script to do so.
 \begin{quote}
@@ -278,7 +279,7 @@ AnalysisOfOptimalTrajectory()
 
 In this section, the trajectory for $x=5,z=5$ was analyzed. First the Optimal trajectory was calculated and saved, then the simulation was run and data stored, and finally both results were plotted against each other. To reiterate, \textbf{Solid lines} are to show the optimal trajectory, and \textbf{dashed lines} show the simulated quad-rotor path.
 
-Ultimately, the results will be compared to \textbf{one} of D'Andrea's results \textcolor{red}{Citation Needed}. 
+Ultimately, the results will be compared to \textbf{one} of D'Andrea's results\cite{D'Andrea}. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                Simulation Analysis                                                                         %
@@ -298,21 +299,36 @@ usim = [controllerdata.actuators.pitchrate;...
 	controllerdata.actuators.thrust];
 \end{lstlisting}
 \end{quote}
-The preceding lines of code are meant to show how easily the data can be unpacked and plotted against each other. Below, \textcolor{blue}{\textbf{Figure X} shows the optimal and actual state of the quadrotor and \textbf{figure Y} shows the optimal and actual inputs of the quadrotor.}
+The preceding lines of code are meant to show how easily the data can be unpacked and plotted against each other. Below, Figure \ref{State Plot} shows the optimal and actual state of the quadrotor, and Figure \ref{Input Plot} shows the optimal and actual inputs of the quadrotor.
 
 
 \begin{figure}[h!]
   \centering
-  \begin{minipage}[b]{0.45\textwidth}
+  \begin{minipage}[b]{0.5\textwidth}
     \includegraphics[width=\textwidth]{State.png}
-    \caption{Quadcopter state over time.}
+    \caption{\label{State Plot} Quadcopter state over time.}
   \end{minipage}
   \hfill
   \begin{minipage}[b]{0.45\textwidth}
     \includegraphics[width=\textwidth]{Inputs.png}
-    \caption{Quadcopter Inputs over time.}
+    \caption{\label{Input Plot} Quadcopter Inputs over time.}
   \end{minipage}
 \end{figure}
+
+% \begin{figure}[H]
+%   \centering
+	
+%     \includegraphics[width=.6\textwidth,left]{State.png}
+%     \label{State}
+%     \caption{\label{State Plot} Quadcopter state over time.}
+%   \end{figure}
+%   \hfill
+% \begin{figure}[H]
+% \label{Input Plot}
+%     \includegraphics[width=\textwidth]{Inputs.png}
+%     \label{Input Plot}
+%     \caption{\label{Input Plot} Quadcopter Inputs over time.}
+% \end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -325,7 +341,7 @@ We can compare the simulated trajectory with that of \textit{Performance benchma
 Before comparing results to D'Andrea's of time optimal trajectory results, the differences in simulations must be addressed. To start, D'Andrea's control input is bang-bang in thrust and bang-singular in pitch rate.\textcolor{red}{Citation Needed}. Additionally, those inputs are non-zero values at both the start and end. Whereas our controller is continuous(\textcolor{red}{???}) and the inputs both begin at zero values. The plot for his results are shown in figure \textcolor{red}{X} below. 
 \begin{figure}[H]
 \centerline{\includegraphics[width=12cm, height=12cm]{DAndrea_55_Plot.png}}
-  \caption{\textcolor{red}{Screenshot?}}
+  \caption{\label{D'Andrea Plot} Screenshot of results}
   \label{fig}
 \end{figure}
 Qualitatively, the inputs can be broken down into sections, as is described by the switching functions \textcolor{red}{Let's try and get another source about this topic}. The Thrust begins at $20 N$, then drops to 0 as the quad-copter nears it's final state, $x=z=5$. The pitch rate begins at $10 rad/s$, drops to $0$, then to $-10 rad/s$ to stabilize, and finally jumps to $10 rad/s$. 
@@ -359,6 +375,10 @@ MatthewPeterKelly
 \textit{OptimTraj}
 GitHub
 \\\texttt{https://github.com/MatthewPeterKelly/OptimTraj}
+
+\bibitem{D'Andrea}
+D'Andrea
+
 \end{thebibliography}
 
 % End of document (everything after this is ignored)
