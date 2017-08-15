@@ -22,13 +22,12 @@ hold on;
 for i=1:size(xopt,1)
     plot(tsim,xsim(i,:),'--','color',colorList(i,:));
 end
-xlim([0, topt(end)])
 title('Quadcoper State')
-legend('x (m)','xdot (m/s)','z (m)','zdot (m/s)','theta (rad)','Location','northwest');
+legend('x (m)','xdot (m/s)','z (m)','zdot (m/s)','theta (rad)');
 xlabel('time (s)')
-ylabel('Magnitude')
 grid on
 % To here
+xlim([topt(1) topt(end)]);
 
 % Comment from here (Input)
 figure(2)
@@ -37,10 +36,9 @@ hold on;
 for i=1:size(uopt,1)
     plot(tsim,usim(i,:),'--','color',colorList(i,:));
 end
-legend('pitchrate (\omega/s)','thrust (N)','Location','northwest');
+legend('pitchrate (rad/s)','thrust (N)','location','northwest');
 title('Quadcopter Inputs')
 xlabel('time (s)')
-ylabel('Magnitude')
 grid on
 % To here
 
