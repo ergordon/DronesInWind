@@ -95,7 +95,7 @@ OptimTraj \cite{OptimTraj} was used for trajectory planning. OptiTraj is a MATLA
   \item Initial trajectory guesses
 \end{itemize}
 
-The optimal trajectory can now be solved for and subsequently "unpacked". By unpacking the solution, the state and input over time can be tracked and analyzed. One thing to note, however, is that the time-steps of solution matrices do \textbf{not} line up with the simulation that will run the controller with the optimal trajectory. This can be mitigated in the OptimTraj solver options, but will still lead to errors, which will be discussed further below. 
+The optimal trajectory can now be solved for and subsequently "unpacked". By unpacking the solution, the state and input over time can be tracked and analyzed. One thing to note, however, is that the time-steps of solver matrices do \textbf{not} line up with the simulation time steps provided that run the controller. This is accounted for by modifying the simulation parameters. 
 \subsubsection{Function Dynamics}
 The simulations begins by setting up the function dynamics, \lstinline!problem.func.dynamics!, as explained in the \textbf{Model} section above: 
 \begin{quote}
@@ -109,30 +109,32 @@ EOMs= [xdot;
 
 numf = matlabFunction(EOMs,'vars',[x xdot z zdot theta w thrust]);
 problem.func.dynamics= @(t,x,u) numf( x(1,:),x(2,:),x(3,:),x(4,:),x(5,:),
-                                      u(1,:), u(2,:)) );
+                                      u(1,:),u(2,:)) );
 
 \end{lstlisting}
 \end{quote}
 
 \subsubsection{Problem Bounds}
-The next step is to set up the \lstinline!problem.bounds!. For the function dynamics, a mass-normalized thrust was chosen to keep the model simple, shown in \textbf{Table 1} below. These parameters were chosen so that results of the simulation can be compared to results from D'Andrea's paper\cite{D'Andrea}.
-\begin{figure}[H]
+The next step is to set up the \lstinline!problem.bounds!. For the function dynamics, a mass-normalized thrust was chosen to keep the model simple, shown in table \ref{Problem Bounds} below. These parameters were chosen so that results of the simulation can be compared to results from D'Andrea's paper\cite{D'Andrea}. 
+
+\begin{table}[H]
 \begin{center}
 \begin{tabular}{ |p{2.5cm}||p{2cm}||p{3cm}| }
- \hline
- \multicolumn{3}{|c|}{\textbf{Table 1}   Problem Bounds} \\
+
  \hline
  Parameter & Value & Description\\
  \hline
  $t_{i}$   & 0 s  & Initial time\\
  $t_{f}$  & 2 s  & Final time\\
- $\underline{F}/m$ & 0 m/$s^{2}$ & Min thrust\\
+ $\underline{F}/m$ & 1 m/$s^{2}$ & Min thrust\\
  $\overline{F}/m$ & 20 m/$s^{2}$ & Max thrust\\
  $\overline{\omega}$ & 10 rad/s & Max pitch rate \\
  \hline
 \end{tabular}
+\caption{Problem Bounds }
+\label{Problem Bounds}
 \end{center}
-\end{figure}
+\end{table}
 
 \clearpage
 
@@ -149,11 +151,11 @@ problem.func.pathObj = @(t,x,u)( sum(u(2,:).^2,1) );
 % Pitch Rate:
 problem.func.pathObj = @(t,x,u)( sum(u(1,:).^2,1) );
 
-% time
+% Time
 problem.func.pathObj = @(t,x,u)( sum((x(1,:)-x_f).^2,1) 
                                 +sum((x(3,:)-z_f).^2,1))
 
-% time objective function for boundary points
+% Time objective function for boundary points
 problem.func.bndObj = @(t0,x0,tF,xF) (tF-t0)
 
 \end{lstlisting}
@@ -221,7 +223,7 @@ end
 
 \end{lstlisting}
 \end{quote}
-Where \lstinline!data.index! is initialized at 1. Recall, however, that this leads to an error. Fortunately, the states of each index are close enough to the quadcopter's actual state that it will still converge and follow a similar path to the time-optimal trajectory. 
+Where \lstinline!data.index! is initialized at 1. 
 \newline
 \newline
 After determining that the simulation is still within the regime in which a trajectory is available, the controller will find the respective trajectory point to linearize about for the current time-step.  The angle for this trajectory point is passed into the MATLAB functions to determine the relevant A and B matrices, which are then used in conjunction with the already initialized weights to create a gain matrix using LQR.
@@ -234,7 +236,7 @@ B = data.funcB(theta);
 \end{lstlisting}
 \end{quote}
 
-Finally, the input $u = -Kx$ is applied in which $u$ is a column of two inputs, the first being thrust and the second being pitch rate.  Note here that the thrust is augmented by the equilibrium condition for hover, $f = mg$.  K is the previously specified gain matrix, and x is the difference between the current state and the trajectory state at the current time.
+Finally, the input $u = -Kx$ is applied in which $u$ is a column of two inputs, the first being thrust and the second being pitch rate.  Note here that for hover, the thrust \textit{must} augmented by the equilibrium condition, $f = mg$.  K is the previously specified gain matrix, and x is the difference between the current state and the trajectory state at the current time.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                         Running Simulation                                                                                %
@@ -273,7 +275,7 @@ AnalysisOfOptimalTrajectory()
 \newline
 \lstinline!AnalysisOfOptimalTrajectory()! plots the simulation against the optimal trajectory calculated by optimTraj. \textbf{Solid lines} are to show the optimal trajectory, and \textbf{dashed lines} show the simulated quad-rotor path.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                                Analysis                                                                                %
+%                                                                                Analysis  of Optimal Trajectory  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Analysis of Optimal Trajectory}
 
@@ -282,7 +284,7 @@ In this section, the trajectory for $x=5,z=5$ was analyzed. First the Optimal tr
 Ultimately, the results will be compared to \textbf{one} of D'Andrea's results\cite{D'Andrea}. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                                Simulation Analysis                                                                         %
+%                                                                                Simulation Analysis               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Simulation Analysis}
 \begin{quote}
@@ -300,6 +302,9 @@ usim = [controllerdata.actuators.pitchrate;...
 \end{lstlisting}
 \end{quote}
 The preceding lines of code are meant to show how easily the data can be unpacked and plotted against each other. Below, Figure \ref{State Plot} shows the optimal and actual state of the quadrotor, and Figure \ref{Input Plot} shows the optimal and actual inputs of the quadrotor.
+\newline
+\newline
+Reminder, \textbf{Solid lines} show the calculated optimal trajectory. \textbf{Dashed lines} show the simulated quad-rotor path.
 
 
 \begin{figure}[h!]
@@ -315,20 +320,6 @@ The preceding lines of code are meant to show how easily the data can be unpacke
   \end{minipage}
 \end{figure}
 
-% \begin{figure}[H]
-%   \centering
-	
-%     \includegraphics[width=.6\textwidth,left]{State.png}
-%     \label{State}
-%     \caption{\label{State Plot} Quadcopter state over time.}
-%   \end{figure}
-%   \hfill
-% \begin{figure}[H]
-% \label{Input Plot}
-%     \includegraphics[width=\textwidth]{Inputs.png}
-%     \label{Input Plot}
-%     \caption{\label{Input Plot} Quadcopter Inputs over time.}
-% \end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -336,25 +327,27 @@ The preceding lines of code are meant to show how easily the data can be unpacke
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Comparison with D'Andrea Results}
 
-We can compare the simulated trajectory with that of \textit{Performance benchmarking of quadrotor systems using time-optimal control}. \textcolor{red}{Citation} 
+We can compare the simulated trajectory with that of \textit{Performance Benchmarking of Quadrotor Systems Using Time-Optimal Control} \cite{D'Andrea}. The trajectory to be compared to from D'Andrea's paper is shown in Figure \ref{D'Andrea Plot}
 
-Before comparing results to D'Andrea's of time optimal trajectory results, the differences in simulations must be addressed. To start, D'Andrea's control input is bang-bang in thrust and bang-singular in pitch rate.\textcolor{red}{Citation Needed}. Additionally, those inputs are non-zero values at both the start and end. Whereas our controller is continuous(\textcolor{red}{???}) and the inputs both begin at zero values. The plot for his results are shown in figure \textcolor{red}{X} below. 
+
 \begin{figure}[H]
-\centerline{\includegraphics[width=12cm, height=12cm]{DAndrea_55_Plot.png}}
-  \caption{\label{D'Andrea Plot} Screenshot of results}
+\centerline{\includegraphics[width=9cm, height=8.5cm]{DAndrea_55_Plot.png}}
+  \caption{\label{D'Andrea Plot} Screenshot of D'Andrea Results}
   \label{fig}
 \end{figure}
-Qualitatively, the inputs can be broken down into sections, as is described by the switching functions \textcolor{red}{Let's try and get another source about this topic}. The Thrust begins at $20 N$, then drops to 0 as the quad-copter nears it's final state, $x=z=5$. The pitch rate begins at $10 rad/s$, drops to $0$, then to $-10 rad/s$ to stabilize, and finally jumps to $10 rad/s$. 
-\newline
-\newline
-In the following subsections we will show how the behavior of our controller compares and how it changes as the final state goes from $x=z=1$ to $x=z=5$.
+
+Though both results are nearly identical, the biggest difference in performance is in that of the inputs. 
+D'Andrea input for thrust is bang-bang, meaning there is a switch discontinuity AND the input only takes the minimum and maximum values \cite{BangBangControl}. D'Andrea's pitch rate is bang-singular, meaning the control input is always at full positive or negative saturation, except during singular arcs \cite{D'Andrea}.
+
+In our model, the inputs were free to vary as continuously as possible between the bounds set in table \ref{Problem Bounds}. Despite this, both models arrived at the destination $x=z=5$ following the same time-optimal path and input behavior. 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              D'Andrea Results                                                                        %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
-% A method that computes quadcopter trajectories satisfying the minimal principle with respect to time-optimality has been developed. The method is based on the two-dimensional quadcopter model with an optimal trajectory created using OptimTraj. By defining the dynamics, bounds and cost function the algorithm was able to create an optimal path for which the drone was to follow. Testing this method, the simulated drone accomplished moving from a position (0,0) to (1,1) in a time optimal manner.
+\clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                Future Work                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -365,21 +358,54 @@ With the completion of a 2D optimized drone path, plans to enhance the simulatio
   \item Implement 3D rigid body dynamics
   \item Implement additional aerodynamic forces such as drag and ground effect
 \end{itemize}
-With these immediate goals in mind, an accurate simulation can be created to further test the overarching research initiative.
+\textit{Controlling of an Single Drone}\cite{Controlling of an Single Drone} provides an outline for how to linearize a 3D quadcopter using rigid body dynamics. A key difference to note is that in the dynamics discussed in \cite{Controlling of an Single Drone}, each of the four quadrotor blades can produce its own thrust, which will then control the pitch, roll, and yaw of the rigid body. Additionally, the paper gives a brief description of the mechanism on applying aerodynamic forces, namely, drag.
+
+
 % Display list of references in IEEE Transactions format.
 \clearpage
 % Display list of references in IEEE format.
+
+
+
 \begin{thebibliography}{9}
+
+
+\bibitem{Controlling of an Single Drone}
+Emile Biever
+\textit{Controlling of an Single Drone}.
+TU/E Eindhoven: Department of Mechanical Engineering, 2015.
+
+
+
 \bibitem{OptimTraj} 
-MatthewPeterKelly
+Matthew Peter Kelly
 \textit{OptimTraj}
 GitHub
 \\\texttt{https://github.com/MatthewPeterKelly/OptimTraj}
 
+
+\bibitem{BangBangControl}
+Nguyen Tan Tien
+\textit{Introduction to Control Theory Including Optimal Control}.
+C.11 Bang-bang Control:53-58, 2002
+\\\texttt{https://goo.gl/pj9oyA}
+% Too long to fit:
+%  http://www4.hcmut.edu.vn/~nttien/Lectures/Optimal%20Control/C.11%20Bang-bang%20Control.pdf
+
+
+
 \bibitem{D'Andrea}
-D'Andrea
+Rafaello D'Andrea
+\textit{Performance Benchmarking of Quadrotor Systems Using Time-Optimal Control}.
+Auton Robot, 33:69-88, 2012.
+
+
+
+
+
 
 \end{thebibliography}
+
 
 % End of document (everything after this is ignored)
 \end{document}
