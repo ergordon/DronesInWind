@@ -23,7 +23,7 @@ for i=1:size(xopt,1)
     plot(tsim,xsim(i,:),'--','color',colorList(i,:));
 end
 title('Quadcoper State')
-legend('x (m)','xdot (m/s)','z (m)','zdot (m/s)','theta (rad)');
+legend('x (m)','xdot (m/s)','z (m)','zdot (m/s)','theta (rad)','location','northwest');
 xlabel('time (s)')
 grid on
 % To here
