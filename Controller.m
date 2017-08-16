@@ -89,8 +89,6 @@ function [actuators,data] = runControlSystem(sensors,references,parameters,data)
 % Reference trajectory
 ind = data.index;
 if data.index < length(data.trajT)
-    data.index = data.index + 1;
-    
     trajX = data.trajX(ind);
     trajXdot = data.trajXdot(ind);
     trajZ = data.trajZ(ind);
@@ -98,6 +96,7 @@ if data.index < length(data.trajT)
     trajTheta = data.trajTheta(ind);
     trajW = data.trajW(ind);
     trajF = data.trajF(ind);
+    data.index = data.index + 1;
 else
     data.index = data.index+1;
     trajX = data.trajX(end);
