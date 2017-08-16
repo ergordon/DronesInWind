@@ -297,14 +297,14 @@ if (isempty(fig))
     set(gcf,'renderer','opengl');
     set(gcf,'color','w');
     axis equal;
-    axis([-4 4 -3 3]);
+    axis([-6 6 -6 6]);
     axis manual;
     hold on;
     axis off;
     box on;
     
     % Grid
-    xmax = 4;
+    xmax = 6;
     for x = -xmax:1:xmax
         line([x x],[-xmax xmax],'color',0.75*[1 1 1],'linewidth',0.5);
         line([-xmax xmax],[x x],'color',0.75*[1 1 1],'linewidth',0.5);
