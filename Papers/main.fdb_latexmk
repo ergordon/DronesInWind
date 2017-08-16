@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1502833100 "main.tex" "main.pdf" "main" 1502833101
+["pdflatex"] 1502909644 "main.tex" "main.pdf" "main" 1502909645
   "/etc/texmf/web2c/texmf.cnf" 1500559619 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
@@ -132,11 +132,11 @@
   "Pictures/DAndrea_55_Plot.png" 1502820936 99968 907dda196bca29187d93d8bd1100891c ""
   "Pictures/Inputs.png" 1502832493 23508 88088ea58a0cf8ed94977e102e3f296b ""
   "Pictures/State.png" 1502832562 26736 a76a48d85ec48e86b9e8774c2d021405 ""
-  "main.aux" 1502833101 3790 a32f2d2adbdff2f1ce609bb188cc76a3 ""
-  "main.out" 1502833101 1007 66d158ad440f879d5057d78fac066246 ""
-  "main.tex" 1502832651 18918 8d25901a26040990ab9630d61862e3a2 ""
+  "main.aux" 1502909645 3688 802c2c8c13163f4bdf39dd12267a02e3 ""
+  "main.out" 1502909645 1007 66d158ad440f879d5057d78fac066246 ""
+  "main.tex" 1502909039 18537 6d9b8446940275d8db13cf09d258f6d1 ""
   (generated)
-  "main.pdf"
   "main.log"
-  "main.aux"
   "main.out"
+  "main.pdf"
+  "main.aux"

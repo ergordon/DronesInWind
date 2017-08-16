@@ -1,8 +1,4 @@
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  16 AUG 2017 07:59
-=======
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.7.20)  15 AUG 2017 21:38
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.7.20)  16 AUG 2017 18:54
 entering extended mode
  \write18 enabled.
  file:line:error style messages enabled.
@@ -326,63 +322,8 @@ Package: enumitem 2011/09/28 v3.5.2 Customized lists
 \enit@inbox=\box30
 \enitdp@description=\count121
 )
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-(/usr/local/texlive/2017/texmf-dist/tex/latex/adjustbox/adjustbox.sty
-Package: adjustbox 2012/05/21 v1.0 Adjusting TeX boxes (trim, clip, ...)
-
-(/usr/local/texlive/2017/texmf-dist/tex/latex/xkeyval/xkeyval.sty
-Package: xkeyval 2014/12/03 v2.7a package option processing (HA)
-
-(/usr/local/texlive/2017/texmf-dist/tex/generic/xkeyval/xkeyval.tex
-(/usr/local/texlive/2017/texmf-dist/tex/generic/xkeyval/xkvutils.tex
-\XKV@toks=\toks30
-\XKV@tempa@toks=\toks31
-)
-\XKV@depth=\count122
-File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
-))
-(/usr/local/texlive/2017/texmf-dist/tex/latex/adjustbox/adjcalc.sty
-Package: adjcalc 2012/05/16 v1.1 Provides advanced setlength with multiple back
--ends (calc, etex, pgfmath)
-)
-(/usr/local/texlive/2017/texmf-dist/tex/latex/adjustbox/trimclip.sty
-Package: trimclip 2012/05/16 v1.0 Trim and clip general TeX material
-
-(/usr/local/texlive/2017/texmf-dist/tex/latex/collectbox/collectbox.sty
-Package: collectbox 2012/05/17 v0.4b Collect macro arguments as boxes
-\collectedbox=\box31
-)
-\tc@llx=\dimen135
-\tc@lly=\dimen136
-\tc@urx=\dimen137
-\tc@ury=\dimen138
-Package trimclip Info: Using driver 'tc-pdftex.def'.
-
-(/usr/local/texlive/2017/texmf-dist/tex/latex/adjustbox/tc-pdftex.def
-File: tc-pdftex.def 2012/05/13 v1.0 Clipping driver for pdftex
-))
-\adjbox@Width=\dimen139
-\adjbox@Height=\dimen140
-\adjbox@Depth=\dimen141
-\adjbox@Totalheight=\dimen142
-
-(/usr/local/texlive/2017/texmf-dist/tex/latex/ifoddpage/ifoddpage.sty
-Package: ifoddpage 2016/04/23 v1.1 Conditionals for odd/even page detection
-\c@checkoddpage=\count123
-)
-(/usr/local/texlive/2017/texmf-dist/tex/latex/varwidth/varwidth.sty
-Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
-\@vwid@box=\box32
-\sift@deathcycles=\count124
-\@vwid@loff=\dimen143
-\@vwid@roff=\dimen144
-))
-(/usr/local/texlive/2017/texmf-dist/tex/latex/base/fontenc.sty
-Package: fontenc 2017/04/05 v2.0i Standard LaTeX package
-=======
 (/usr/share/texlive/texmf-dist/tex/latex/adjustbox/adjustbox.sty
 Package: adjustbox 2012/05/21 v1.0 Adjusting TeX boxes (trim, clip, ...)
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
 
 (/usr/share/texlive/texmf-dist/tex/latex/xkeyval/xkeyval.sty
 Package: xkeyval 2014/12/03 v2.7a package option processing (HA)
@@ -541,11 +482,7 @@ Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1369.
 Package xcolor Info: Model `Gray' substituted by `gray' on input line 1370.
 Package xcolor Info: Model `wave' substituted by `hsb' on input line 1371.
 )
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-(/usr/local/texlive/2017/texmf-dist/tex/latex/listings/listings.sty
-=======
 (/usr/share/texlive/texmf-dist/tex/latex/listings/listings.sty
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
 \lst@mode=\count125
 \lst@gtempboxa=\box33
 \lst@token=\toks32
@@ -559,11 +496,7 @@ Package xcolor Info: Model `wave' substituted by `hsb' on input line 1371.
 \lst@lineno=\count130
 \lst@maxwidth=\dimen148
 
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-(/usr/local/texlive/2017/texmf-dist/tex/latex/listings/lstmisc.sty
-=======
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
 File: lstmisc.sty 2015/06/04 1.6 (Carsten Heinz)
 \c@lstnumber=\count131
 \lst@skipnumbers=\count132
@@ -580,14 +513,8 @@ Package: listings 2015/06/04 1.6 (Carsten Heinz)
 \jayDepth@mlpr=\skip57
 \sectionRuleOffset@mlpr=\skip58
 \toks@mlpr=\toks33
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-)
-(./DroneInTheWind.aux)
-\openout1 = `DroneInTheWind.aux'.
-=======
 ) (./main.aux)
 \openout1 = `main.aux'.
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 33.
 LaTeX Font Info:    ... okay on input line 33.
@@ -606,11 +533,7 @@ LaTeX Font Info:    ... okay on input line 33.
 LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 33.
 LaTeX Font Info:    Try loading font information for TS1+cmr on input line 33.
 
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-(/usr/local/texlive/2017/texmf-dist/tex/latex/base/ts1cmr.fd
-=======
 (/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    ... okay on input line 33.
@@ -628,11 +551,7 @@ LaTeX Font Info:    ... okay on input line 33.
 \MPnumerator=\count140
 \makeMPintoPDFobject=\count141
 \everyMPtoPDFconversion=\toks35
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-) (/usr/local/texlive/2017/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
-=======
 ) (/usr/share/texlive/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
 Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
 
 (/usr/share/texlive/texmf-dist/tex/latex/oberdiek/grfext.sty
@@ -685,11 +604,7 @@ e
 
 \AtBeginShipoutBox=\box36
 Package hyperref Info: Link coloring ON on input line 33.
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-(/usr/local/texlive/2017/texmf-dist/tex/latex/hyperref/nameref.sty
-=======
 (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
 
 (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
@@ -720,268 +635,136 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 37.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-{/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Try loading font information for T1+fvm on input line 91.
-
-(/usr/local/texlive/2017/texmf-dist/tex/latex/bera/t1fvm.fd
-File: t1fvm.fd 2004/09/07 scalable font definitions for T1/fvm.
-)
-LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 10.20007pt on input line 91.
-LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 9.30756pt on input line 91.
-LaTeX Font Info:    Try loading font information for TS1+fvm on input line 96.
-=======
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Try loading font information for T1+fvm on input line 100.
+LaTeX Font Info:    Try loading font information for T1+fvm on input line 94.
 
 (/usr/share/texlive/texmf-dist/tex/latex/bera/t1fvm.fd
 File: t1fvm.fd 2004/09/07 scalable font definitions for T1/fvm.
 )
 LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 10.20007pt on input line 100.
+(Font)              scaled to size 10.20007pt on input line 94.
 LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 9.30756pt on input line 100.
-LaTeX Font Info:    Try loading font information for TS1+fvm on input line 105.
-
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
+(Font)              scaled to size 9.30756pt on input line 94.
+LaTeX Font Info:    Try loading font information for TS1+fvm on input line 99.
 
 (/usr/share/texlive/texmf-dist/tex/latex/bera/ts1fvm.fd
 File: ts1fvm.fd 2004/09/07 scalable font definitions for TS1/fvm.
 )
 LaTeX Font Info:    Font shape `TS1/fvm/m/n' will be
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-(Font)              scaled to size 9.30756pt on input line 96.
- [2] [3pdfTeX warning (ext4): destination with the same identifier (name{table.
-1}) has been already used, duplicate ignored
-=======
-(Font)              scaled to size 9.30756pt on input line 105.
+(Font)              scaled to size 9.30756pt on input line 99.
  [2] [3pdfTeX warning (ext4): destination with the same identifier (name{table.
 1}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.139 \clearpage
+l.159 \clearpage
                 ]
-
-LaTeX Font Warning: Command \small invalid in math mode on input line 169.
-
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.130 	\clearpage
-                 ]
-
-LaTeX Font Warning: Command \small invalid in math mode on input line 160.
-
-
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-LaTeX Font Warning: Command \small invalid in math mode on input line 163.
-
 
 LaTeX Font Warning: Command \small invalid in math mode on input line 166.
 
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 169.
+
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 172.
+
 [4
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 217--221
+Underfull \hbox (badness 10000) in paragraph at lines 224--228
 
  []
 
 [5]
-Underfull \hbox (badness 10000) in paragraph at lines 264--271
-=======
-[4
+Underfull \hbox (badness 10000) in paragraph at lines 272--279
+
+ []
+
+[6
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 226--230
+Underfull \hbox (badness 10000) in paragraph at lines 305--308
 
  []
 
-[5]
-Underfull \hbox (badness 10000) in paragraph at lines 273--280
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
+
+Underfull \hbox (badness 10000) in paragraph at lines 305--308
 
  []
 
-[6]
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-Underfull \hbox (badness 10000) in paragraph at lines 295--299
-
- []
-
-<./Pictures/State.png, id=202, 421.575pt x 316.18124pt>
+<./Pictures/State.png, id=205, 421.575pt x 316.18124pt>
 File: ./Pictures/State.png Graphic file (type png)
 
 <use ./Pictures/State.png>
-Package pdftex.def Info: ./Pictures/State.png used on input line 304.
+Package pdftex.def Info: ./Pictures/State.png used on input line 327.
 (pdftex.def)             Requested size: 230.18253pt x 172.641pt.
 
-<./Pictures/Inputs.png, id=203, 421.575pt x 316.18124pt>
+<./Pictures/Inputs.png, id=206, 421.575pt x 316.18124pt>
 File: ./Pictures/Inputs.png Graphic file (type png)
 
 <use ./Pictures/Inputs.png>
-Package pdftex.def Info: ./Pictures/Inputs.png used on input line 309.
+Package pdftex.def Info: ./Pictures/Inputs.png used on input line 332.
 (pdftex.def)             Requested size: 230.18253pt x 172.641pt.
 
-<./Pictures/DAndrea_55_Plot.png, id=206, 552.56438pt x 602.25pt>
+<./Pictures/DAndrea_55_Plot.png, id=207, 552.56438pt x 602.25pt>
 File: ./Pictures/DAndrea_55_Plot.png Graphic file (type png)
 
 <use ./Pictures/DAndrea_55_Plot.png>
-Package pdftex.def Info: ./Pictures/DAndrea_55_Plot.png used on input line 325.
+Package pdftex.def Info: ./Pictures/DAndrea_55_Plot.png used on input line 338.
 
 (pdftex.def)             Requested size: 256.07133pt x 241.85144pt.
-=======
-Underfull \hbox (badness 10000) in paragraph at lines 304--308
+ [7
 
- []
-
-<./Pictures/State.png, id=207, 421.575pt x 316.18124pt>
-File: ./Pictures/State.png Graphic file (type png)
-
-<use ./Pictures/State.png>
-Package pdftex.def Info: ./Pictures/State.png used on input line 313.
-(pdftex.def)             Requested size: 230.18253pt x 172.641pt.
-
-<./Pictures/Inputs.png, id=208, 421.575pt x 316.18124pt>
-File: ./Pictures/Inputs.png Graphic file (type png)
-
-<use ./Pictures/Inputs.png>
-Package pdftex.def Info: ./Pictures/Inputs.png used on input line 318.
-(pdftex.def)             Requested size: 230.18253pt x 172.641pt.
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
- [7pdfTeX warning (ext4): destination with the same identifier (name{figure.1})
- has been already used, duplicate ignored
+pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) ha
+s been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-l.328 	\end{figure}
-                   pdfTeX warning (ext4): destination with the same identifier 
-(name{figure.2}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.328 	\end{figure}
-                    <./Pictures/State.png (PNG copy)> <./Pictures/Inputs.png (P
-NG copy)>] [8pdfTeX warning (ext4): destination with the same identifier (name{
-figure.3}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.341 	\clearpage
-                  <./Pictures/DAndrea_55_Plot.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 346--349
-=======
-l.331 
+l.342 
       pdfTeX warning (ext4): destination with the same identifier (name{figure.
 2}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.331 
+l.342 
        <./Pictures/State.png (PNG copy)> <./Pictures/Inputs.png (PNG copy)>]
-<./Pictures/DAndrea_55_Plot.png, id=229, 552.56438pt x 602.25pt>
-File: ./Pictures/DAndrea_55_Plot.png Graphic file (type png)
-
-<use ./Pictures/DAndrea_55_Plot.png>
-Package pdftex.def Info: ./Pictures/DAndrea_55_Plot.png used on input line 334.
-
-(pdftex.def)             Requested size: 256.07133pt x 241.85144pt.
- [8pdfTeX warning (ext4): destination with the same identifier (name{figure.3})
- has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.350 \clearpage
-                 <./Pictures/DAndrea_55_Plot.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 355--358
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
+Underfull \hbox (badness 10000) in paragraph at lines 359--362
 
  []
 
-[9
+[8pdfTeX warning (ext4): destination with the same identifier (name{figure.3}) 
+has been already used, duplicate ignored
 
-]
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-LaTeX Font Info:    Try loading font information for T1+cmtt on input line 375.
-=======
-LaTeX Font Info:    Try loading font information for T1+cmtt on input line 384.
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.369 \clearpage
+                 <./Pictures/DAndrea_55_Plot.png>]
+LaTeX Font Info:    Try loading font information for T1+cmtt on input line 388.
 
- (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-<<<<<<< HEAD:Papers/DroneInTheWind.log
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 411.
- [10
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 424.
+ [9
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 411.
-
-(./DroneInTheWind.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 411.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 411.
-Package rerunfilecheck Info: File `DroneInTheWind.out' has not changed.
-(rerunfilecheck)             Checksum: 66D158AD440F879D5057D78FAC066246;1007.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 411.
- ) 
-Here is how much of TeX's memory you used:
- 11160 strings out of 492995
- 165184 string characters out of 6132704
- 350332 words of memory out of 5000000
- 14406 multiletter control sequences out of 15000+600000
- 21468 words of font info for 65 fonts, out of 8000000 for 9000
- 1141 hyphenation exceptions out of 8191
- 54i,12n,118p,640b,1262s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2017/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}
-{/usr/local/texlive/2017/texmf-dist/fonts/enc/dvips/base/8r.enc}{/usr/local/tex
-live/2017/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}</usr/local/texl
-ive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texli
-ve/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texliv
-e/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/
-2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/20
-17/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2017/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2017/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2017/tex
-mf-dist/fonts/type1/public/bera/fvmr8a.pfb></usr/local/texlive/2017/texmf-dist/
-fonts/type1/public/cm-super/sfbx1200.pfb></usr/local/texlive/2017/texmf-dist/fo
-nts/type1/public/cm-super/sfbx1440.pfb></usr/local/texlive/2017/texmf-dist/font
-s/type1/public/cm-super/sfbx1728.pfb></usr/local/texlive/2017/texmf-dist/fonts/
-type1/public/cm-super/sfrm1095.pfb></usr/local/texlive/2017/texmf-dist/fonts/ty
-pe1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2017/texmf-dist/fonts/type
-1/public/cm-super/sfrm1440.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/
-public/cm-super/sfrm2074.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/pu
-blic/cm-super/sfti1200.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/publ
-ic/cm-super/sftt1200.pfb>
-Output written on DroneInTheWind.pdf (10 pages, 404071 bytes).
-PDF statistics:
- 337 PDF objects out of 1000 (max. 8388607)
- 301 compressed objects within 4 object streams
- 127 named destinations out of 1000 (max. 500000)
-=======
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 420.
- [10
-
-]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 420.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 424.
  (./main.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 420.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 420.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 424.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 424.
 Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 66D158AD440F879D5057D78FAC066246;1007.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 420.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 424.
  ) 
 Here is how much of TeX's memory you used:
- 11160 strings out of 493013
- 164188 string characters out of 6135682
- 349856 words of memory out of 5000000
- 14395 multiletter control sequences out of 15000+600000
+ 11162 strings out of 493013
+ 164221 string characters out of 6135682
+ 317785 words of memory out of 5000000
+ 14399 multiletter control sequences out of 15000+600000
  21468 words of font info for 65 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 54i,12n,118p,629b,1786s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 54i,12n,118p,602b,1262s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}{/usr/share/texliv
 e/texmf-dist/fonts/enc/dvips/base/8r.enc}{/usr/share/texmf/fonts/enc/dvips/cm-s
 uper/cm-super-ts1.enc}</usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
@@ -999,11 +782,10 @@ onts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm
 </usr/share/texmf/fonts/type1/public/cm-super/sfrm2074.pfb></usr/share/texmf/fo
 nts/type1/public/cm-super/sfti1200.pfb></usr/share/texmf/fonts/type1/public/cm-
 super/sftt1200.pfb>
-Output written on main.pdf (10 pages, 405344 bytes).
+Output written on main.pdf (9 pages, 405476 bytes).
 PDF statistics:
- 341 PDF objects out of 1000 (max. 8388607)
- 305 compressed objects within 4 object streams
- 129 named destinations out of 1000 (max. 500000)
->>>>>>> c5bbe8b448b29d3697add17f7d75ce2a57a28dee:Papers/main.log
+ 333 PDF objects out of 1000 (max. 8388607)
+ 299 compressed objects within 3 object streams
+ 127 named destinations out of 1000 (max. 500000)
  144 words of extra memory for PDF output out of 10000 (max. 10000000)
 
