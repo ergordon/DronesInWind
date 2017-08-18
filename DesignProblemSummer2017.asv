@@ -99,16 +99,14 @@ process.minthrust = minThrust;
 % - Maximum pitch rate
 process.maxpitchrate = maxPitchRate;
 % - Maximum roll rate
-process.maxrollrate = maxRollRate;
+process.maxrollrate = maxPitchRate;
 % - Maximum yaw rate
-process.maxyawrate = maxYawRate;
+process.maxyawrate = maxPitchRate;
 
 % DEFINE GEOMETRY
 % Geometry of quadrotor
 [process.pRobot_in1,process.fRobot]=GetRobotModel('quadmodel.mat');
 
-
-%===== Comment back in to include axis of room and quadrotor axis
 % Geometry of coordinate axes
 pFrame = [0 1 0 0;
           0 0 1 0;
@@ -300,7 +298,7 @@ Rx = [1 0 0;
       0 sin(phi) cos(phi)];
 
 % Rotation Matrix  
-R_1in0= Rz*Ry*Rx;
+R_1in0= Rz*Ry*Rx
          
 % Coordinate transformation for robot and then axis
 process.pRobot_in0 = R_1in0*process.pRobot_in1 +repmat(o_1in0,1,length(process.pRobot_in1));        % - coordinate transformation from process.pRobot_in1
@@ -404,30 +402,25 @@ if (isempty(fig))
     fig.view0.axis = axes('position',[0 0 1 1]);
 %     set(gcf,'renderer','opengl');
     axis equal;
-    axis([-7 7 -7 7 -7 7]);
-    
+    axis([-6 6 -6 6 -6 6]);
     axis manual;
     hold on;
     axis on;
     grid on
-    grid minor
     xlabel('X')
     ylabel('Y')
     zlabel('Z')
     box on;
+
     
-%     view([0 0])  % XZ Plane
-%     view([0,90]) % XY Plane
-%     view([90,0]) %YZ Plane
-     view([45,20])
-      % Draws room axis: 
-      fig.roomframe = DrawFrame([],process.pRoomFrame_in0);
+      % Draws room axis: Remove to make it seem like copied less or whatever
+%       fig.roomframe = DrawFrame([],process.pRoomFrame_in0);
     
 
       % Draws robot and then robot axis
       fig.robot = DrawMesh([],process.pRobot_in0,process.fRobot,[.9 .7 .9],1);
       fig.robotframe = DrawFrame([],process.pRobotFrame_in0);
-    
+    %
     
     % Make the figure respond to key commands.
     set(gcf,'KeyPressFcn',@onkeypress);
@@ -455,7 +448,7 @@ drawnow;
 end
 
 
-    % Got rid of this function:
+% Got ride of this function!!!!
 % function box = DrawBox(box,x,y,theta,boxLength,boxWidth)
 
 function [p,f]=GetRobotModel(filename)

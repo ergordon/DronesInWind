@@ -62,8 +62,9 @@ B = [
  
 % Create functions
 data.funcA = matlabFunction(A);     %(f,phi,Psi,theta)
+data.funcA
 data.funcB = matlabFunction(B);     %(phi,Psi,theta)
-
+data.funcB
 % Initialize LQR matrices
 data.Q = 200*eye(9);
 data.R = eye(4);
@@ -118,7 +119,7 @@ if data.index < length(data.trajT)
     trajX = data.trajX(ind);
     trajXdot = data.trajXdot(ind);
     trajY = data.trajY(ind);
-    trajYdot = data.trajYdot(ind);
+    trajYdot = data.Ydot(ind);
     trajZ = data.trajZ(ind);
     trajZdot = data.trajZdot(ind);
     trajTheta = data.trajTheta(ind);
@@ -134,7 +135,7 @@ else
     trajX = data.trajX(end);
     trajXdot = data.trajXdot(end);
     trajY = data.trajY(end);
-    trajYdot = data.trajYdot(end);
+    trajYdot = data.Ydot(end);
     trajZ = data.trajZ(end);
     trajZdot = data.trajZdot(end);
     trajTheta = data.trajTheta(end);
@@ -145,7 +146,7 @@ else
     trajW = 0;
     trajP = 0;
     trajR = 0;
-    trajF = parameters.m*parameters.g;
+    trajF = paraeters.m*parameters.g;
     
 end
 
@@ -162,9 +163,9 @@ state = [sensors.x - trajX;
          sensors.zdot - trajZdot; 
          sensors.theta - trajTheta;
          sensors.phi - trajPhi;
-         sensors.psi - trajPsi];
+         sensors.psi - trajP
      
-input = -data.K*state + [trajW; trajP; trajR; trajF];
+input = -data.K*state + [trajW; trajF];
 
 %~~ Correctly plot inputs (Regulated in DesignProblem, but not recorded)~~
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -177,46 +178,24 @@ else
     input(1) = input(1);
 end
 
-% Regulate Roll Rate
-if input(2) < -data.maxRollRate
-    input(2) = -data.maxRollRate;
-elseif input(1) > data.maxRollRate
-    input(2) = data.maxRollRate;
+% Regulate Thrust
+if input(2) < data.minThrust
+    input(2) = data.minThrust;
+elseif input(2) > data.maxThrust
+    input(2) = data.maxThrust;
 else
     input(2) = input(2);
-end
-
-% Regulate Yaw Rate
-if input(3) < -data.maxYawRate
-    input(3) = -data.maxYawRate;
-elseif input(3) > data.maxYawRate
-    input(3) = data.maxYawRate;
-else
-    input(3) = input(3);
-end
-
-
-% Regulate Thrust
-if input(4) < data.minThrust
-    input(4) = data.minThrust;
-elseif input(4) > data.maxThrust
-    input(4) = data.maxThrust;
-else
-    input(4) = input(4);
 end
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 actuators.pitchrate = input(1);
-actuators.rollrate = input(2);
-actuators.yawrate = input(3);
-actuators.thrust = input(4);
+actuators.thrust = input(2);
 
 
 % Display when the quad has reached the goal state
 if abs(sensors.xdot) < data.vel_error && ...
         abs(sensors.zdot) < data.vel_error && ...
         abs(sensors.x - data.trajX(end)) < data.pos_error && ...
-        abs(sensors.y - data.trajY(end)) < data.pos_error && ...
         abs(sensors.z - data.trajZ(end)) < data.pos_error && ...
         data.endBool == 0
     data.endBool = 1;
@@ -225,8 +204,14 @@ if abs(sensors.xdot) < data.vel_error && ...
     
 end
 
-position = [sensors.x,sensors.y sensors.z]
+position = [sensors.x,sensors.y sensors.z];
 angles = [sensors.theta, sensors.phi, sensors.psi];
+
+actuators.pitchrate = input(1);
+actuators.rollrate = input(2); %input(2); 
+actuators.yawrate = input(3);
+actuators.thrust = input(4)+parameters.m*parameters.g;
+
 
 
 end

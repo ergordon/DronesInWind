@@ -7,8 +7,16 @@ uopt = u;
 
 load data
 tsim = processdata.t;
-xsim = [processdata.x; processdata.xdot; processdata.z; processdata.zdot; processdata.theta];
-usim = [controllerdata.actuators.pitchrate; controllerdata.actuators.thrust];
+xsim = [processdata.x; processdata.xdot;
+        processdata.y; processdata.ydot;
+        processdata.z; processdata.zdot; 
+        processdata.theta
+        processdata.phi;
+        processdata.psi];
+usim = [controllerdata.actuators.pitchrate; 
+        controllerdata.actuators.rollrate;
+        controllerdata.actuators.yawrate;
+        controllerdata.actuators.thrust];
 
 clf;
 

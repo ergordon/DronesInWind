@@ -4,6 +4,8 @@ load('runOptions')
 
 xInitial = 0;
 zInitial = 0;
+yInitial = 0;
+
 m = mass;
 g = gravity;
 
@@ -13,17 +15,23 @@ g = gravity;
 
 
 % Put symbolic EOMs in convenient form
-syms x xdot z zdot theta thrust w real
+syms x xdot y ydot z zdot theta phi psi thrust w p r real
 f = simplify([xdot; 
-              (thrust/m)*sin(theta); 
+              (thrust/m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi)); 
+              ydot;
+              (sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))
               zdot; 
-              (thrust/m)*cos(theta) - g; 
-              w]);
+              (thrust/m)*cos(theta)*cos(phi) - g; 
+              w;
+              p;
+              r]);
+              
 % Convert EOMs from symbolic to numeric
-numf = matlabFunction(f,'vars',[x xdot z zdot theta w thrust]);
+numf = matlabFunction(f,'vars',[x xdot y ydot z zdot theta w phi p psi r thrust]);
 
-problem.func.dynamics = @(t,x,u)( numf(x(1,:), x(2,:), x(3,:), x(4,:), x(5,:),... 
-                                       u(1,:), u(2,:)) );
+problem.func.dynamics = @(t,x,u)( numf(x(1,:), x(2,:), x(3,:), x(4,:), x(5,:),...
+                                       x(6,:), x(7,:), x(8,:), x(9,:),...
+                                       u(1,:), u(2,:), u(3,:), u(4,:) ));
                                    
                                    
                                    
@@ -54,14 +62,18 @@ problem.bounds.initialTime.upp = 0;
 problem.bounds.finalTime.low = 0;
 problem.bounds.finalTime.upp = runTime;
 
-problem.bounds.initialState.low = [xInitial; 0; zInitial; 0; 0];
-problem.bounds.initialState.upp = [xInitial; 0; zInitial; 0; 0];
-problem.bounds.finalState.low = [xFinal; 0; zFinal; 0; 0];
-problem.bounds.finalState.upp = [xFinal; 0; zFinal; 0; 0];
+problem.bounds.initialState.low = [xInitial; 0; yInitial; 0; zInitial; 0;...
+                                    0; 0; 0];
+problem.bounds.initialState.upp = [xInitial; 0; yInitial; 0; zInitial; 0;...
+                                    0; 0; 0];
+problem.bounds.finalState.low = [xFinal; 0; yFinal; 0; zFinal; 0;...
+                                    0; 0; 0];
+problem.bounds.finalState.upp = [xFinal; 0; yFinal; 0; zFinal; 0;...
+                                    0; 0; 0];
 
 
-problem.bounds.control.low = [-maxPitchRate; minThrust];
-problem.bounds.control.upp = [maxPitchRate; maxThrust];
+problem.bounds.control.low = [-maxPitchRate; -maxRollRate; -maxYawRate; minThrust];
+problem.bounds.control.upp = [maxPitchRate; maxRollRate; maxYawRate; maxThrust];
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                    Initial guess at trajectory                          %
@@ -69,7 +81,7 @@ problem.bounds.control.upp = [maxPitchRate; maxThrust];
 
 problem.guess.time = [0,runTime];
 problem.guess.state = [problem.bounds.initialState.low, problem.bounds.finalState.low];
-problem.guess.control = [[0; g],[0; g]];
+problem.guess.control = [[0; 0; 0; m*g], [0; 0; 0; m*g]];
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -100,12 +112,23 @@ t = linspace(soln.grid.time(1), soln.grid.time(end), soln.grid.time(end)*timeDen
 x = soln.interp.state(t);
 u = soln.interp.control(t);
 
+
 clf;
+figure(1)
 subplot(2,1,1);
-plot(t,x);
-legend('x','xdot','z','zdot','theta');
+plot(t,x(1,:),t,x(3,:),t,x(5,:));
+legend('x','y','z');
+subplot(2,1,2)
+plot(t,x(2,:),t,x(4,:),t,x(6,:));
+legend('xdot','ydot','zdot');
+
+
+figure(2)
+subplot(2,1,1)
+plot(t,x(7,:),t,x(8,:),t,x(9,:));
+legend('\theta','\phi','\psi')
 subplot(2,1,2);
 plot(t,u);
-legend('pitch rate','thrust');
+legend('pitch rate','roll rate','yaw rate','thrust');
 
 save('traj.mat','t','x','u');
