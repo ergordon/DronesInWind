@@ -100,7 +100,7 @@ data.pos_error = .05;  % Required distance from final position (for both x and z
 data.endBool = 0;      % Used to only display the end time once
 
 
-data.i = 1;
+data.index = 1;
 
 % Run the controller
 [actuators,data] = runControlSystem(sensors,references,parameters,data);
@@ -113,8 +113,8 @@ function [actuators,data] = runControlSystem(sensors,references,parameters,data)
 % Reference trajectory
 ind = data.index;
 if data.index < length(data.trajT)
-    data.index = data.index + 1;
-    
+    Time_diff = abs(data.trajT(data.index)-sensors.t)
+    data.index = data.index + 1;    
     trajX = data.trajX(ind);
     trajXdot = data.trajXdot(ind);
     trajY = data.trajY(ind);
@@ -149,8 +149,8 @@ else
     
 end
 
-A = data.funcA(trajPhi,trajF,trajPsi,trajTheta);
-B = data.funcB(trajPhi,trajPsi,trajTheta);
+A = data.funcA(trajPsi,trajF,trajPhi,trajTheta);
+B = data.funcB(trajPsi,trajPhi,trajTheta);
 data.K = lqr(A,B,data.Q,data.R);
 
 % Calculate and apply input
@@ -164,8 +164,11 @@ state = [sensors.x - trajX;
          sensors.phi - trajPhi;
          sensors.psi - trajPsi];
      
-input = -data.K*state + [trajW; trajP; trajR; trajF];
-
+TrajX = [trajX;trajXdot;trajY;trajYdot;trajZ;trajZdot;trajTheta;trajPhi;trajPsi];
+TrajU = [trajW; trajP; trajR; trajF];
+ 
+% input = -data.K*state + [trajW; trajP; trajR; trajF];
+input = [trajW; trajP; trajR; trajF];;
 %~~ Correctly plot inputs (Regulated in DesignProblem, but not recorded)~~
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Regulate Pitch Rate
@@ -220,12 +223,13 @@ if abs(sensors.xdot) < data.vel_error && ...
         abs(sensors.z - data.trajZ(end)) < data.pos_error && ...
         data.endBool == 0
     data.endBool = 1;
-    data.timeEnd = parameters.tStep*ind;
+    data.timeEnd = sensors.t;
+    position = [sensors.x,sensors.y sensors.z]
     fprintf('End State Achieved at: %f seconds\n', data.timeEnd)
     
 end
 
-position = [sensors.x,sensors.y sensors.z]
+% position = [sensors.x,sensors.y sensors.z]
 angles = [sensors.theta, sensors.phi, sensors.psi];
 
 

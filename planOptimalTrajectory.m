@@ -19,7 +19,7 @@ syms x xdot y ydot z zdot theta phi psi thrust w p r real
 f = simplify([xdot; 
               (thrust/m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi)); 
               ydot;
-              (sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))
+              (thrust/m)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))
               zdot; 
               (thrust/m)*cos(theta)*cos(phi) - g; 
               w;
@@ -27,7 +27,7 @@ f = simplify([xdot;
               r]);
               
 % Convert EOMs from symbolic to numeric
-numf = matlabFunction(f,'vars',[x xdot y ydot z zdot theta w phi p psi r thrust]);
+numf = matlabFunction(f,'vars',[x xdot y ydot z zdot theta phi psi w p r thrust]);
 
 problem.func.dynamics = @(t,x,u)( numf(x(1,:), x(2,:), x(3,:), x(4,:), x(5,:),...
                                        x(6,:), x(7,:), x(8,:), x(9,:),...
@@ -91,7 +91,7 @@ problem.guess.control = [[0; 0; 0; m*g], [0; 0; 0; m*g]];
 problem.options.nlpOpt = optimset(...
     'Display','iter',...
     'MaxFunEvals',1e5);
-
+problem.options.MaxFunctionEvaluations = 100000
 % problem.options.method = 'trapezoid';
 % problem.options.method = 'hermiteSimpson';
 % problem.options.method = 'rungeKutta';
