@@ -28,8 +28,8 @@ for i = 1:6
     plot(tsim,xsim(i,:))
     hold on
 end
-title('Simulation')
-legend('x','xdot','y','ydot','z','zdot')
+title('Simulation Pos & Vel')
+legend('x','xdot','y','ydot','z','zdot','location','northwest')
 grid on
 xlim([topt(1) topt(end)]);
 subplot(2,1,2)
@@ -37,8 +37,9 @@ for i = 1:6
     plot(topt,xopt(i,:))
     hold on
 end
-title('OptimTraj')
-legend('x','xdot','y','ydot','z','zdot')
+title('OptimTraj Pos & Vel')
+xlim([topt(1) topt(end)]);
+legend('x','xdot','y','ydot','z','zdot','location','northwest')
 grid on
 
 figure(2)
@@ -47,8 +48,8 @@ for i = 7:9
     plot(tsim,xsim(i,:))
     hold on
 end
-title('Simulation')
-legend('\theta','\phi','\psi')
+title('Simulation Angles')
+legend('\theta','\phi','\psi','location','southwest')
 xlim([topt(1) topt(end)]);
 grid on
 subplot(2,1,2)
@@ -56,8 +57,10 @@ for i = 7:9
     plot(topt,xopt(i,:))
     hold on
 end
-title('OptimTraj')
-legend('\theta','\phi','\psi')
+title('OptimTraj Angles')
+
+xlim([topt(1) topt(end)]);
+legend('\theta','\phi','\psi','location','southwest')
 grid on
 
 
@@ -67,10 +70,10 @@ for i = 1:4
     plot(tsim,usim(i,:))
     hold on
 end
-title('Simulation')
+title('Simulation Input')
 xlim([topt(1) topt(end)]);
 grid on
-hl = legend('$\dot{\theta}$','$\dot{\phi}$','$\dot{\psi}$');
+hl = legend('$\dot{\theta}$','$\dot{\phi}$','$\dot{\psi}$','location','northwest');
 set(hl, 'Interpreter', 'latex');
 % xlabel('$\dot{T}$'),ylabel('$\dot{y}');
 
@@ -80,9 +83,11 @@ for i = 1:4
     plot(topt,uopt(i,:))
     hold on
 end
-title('OptimTraj')
+title('OptimTraj Input')
+
+xlim([topt(1) topt(end)]);
 grid on
-hl = legend('$\dot{\theta}$','$\dot{\phi}$','$\dot{\psi}$');
+hl = legend('$\dot{\theta}$','$\dot{\phi}$','$\dot{\psi}$','location','northwest');
 set(hl, 'Interpreter', 'latex');
 
 % 

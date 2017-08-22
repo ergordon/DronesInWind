@@ -113,34 +113,34 @@ function [actuators,data] = runControlSystem(sensors,references,parameters,data)
 % Reference trajectory
 ind = data.index;
 if data.index < length(data.trajT)
-    Time_diff = abs(data.trajT(data.index)-sensors.t)
+%     Time_diff = abs(data.trajT(data.index)-sensors.t)
     data.index = data.index + 1;    
-    trajX = data.trajX(ind);
-    trajXdot = data.trajXdot(ind);
-    trajY = data.trajY(ind);
-    trajYdot = data.trajYdot(ind);
-    trajZ = data.trajZ(ind);
-    trajZdot = data.trajZdot(ind);
-    trajTheta = data.trajTheta(ind);
-    trajPhi = data.trajPhi(ind);
-    trajPsi = data.trajPsi(ind);
+%     trajX = data.trajX(ind);
+%     trajXdot = data.trajXdot(ind);
+%     trajY = data.trajY(ind);
+%     trajYdot = data.trajYdot(ind);
+%     trajZ = data.trajZ(ind);
+%     trajZdot = data.trajZdot(ind);
+%     trajTheta = data.trajTheta(ind);
+%     trajPhi = data.trajPhi(ind);
+%     trajPsi = data.trajPsi(ind);
     
     trajW = data.trajW(ind);
     trajP = data.trajP(ind);
     trajR = data.trajR(ind);
     trajF = data.trajF(ind);
 else
-    
-    trajX = data.trajX(end);
-    trajXdot = data.trajXdot(end);
-    trajY = data.trajY(end);
-    trajYdot = data.trajYdot(end);
-    trajZ = data.trajZ(end);
-    trajZdot = data.trajZdot(end);
-    trajTheta = data.trajTheta(end);
-    trajPhi = data.trajPhi(end);
-    trajPsi = data.trajPsi(end);
-    
+%     
+%     trajX = data.trajX(end);
+%     trajXdot = data.trajXdot(end);
+%     trajY = data.trajY(end);
+%     trajYdot = data.trajYdot(end);
+%     trajZ = data.trajZ(end);
+%     trajZdot = data.trajZdot(end);
+%     trajTheta = data.trajTheta(end);
+%     trajPhi = data.trajPhi(end);
+%     trajPsi = data.trajPsi(end);
+%     
     
     trajW = 0;
     trajP = 0;
@@ -149,26 +149,27 @@ else
     
 end
 
-A = data.funcA(trajPsi,trajF,trajPhi,trajTheta);
-B = data.funcB(trajPsi,trajPhi,trajTheta);
-data.K = lqr(A,B,data.Q,data.R);
+% A = data.funcA(trajPsi,trajF,trajPhi,trajTheta);
+% B = data.funcB(trajPsi,trajPhi,trajTheta);
+% data.K = lqr(A,B,data.Q,data.R);
 
 % Calculate and apply input
-state = [sensors.x - trajX; 
-         sensors.xdot - trajXdot;
-         sensors.y - trajY;
-         sensors.ydot - trajXdot;
-         sensors.z - trajZ; 
-         sensors.zdot - trajZdot; 
-         sensors.theta - trajTheta;
-         sensors.phi - trajPhi;
-         sensors.psi - trajPsi];
-     
-TrajX = [trajX;trajXdot;trajY;trajYdot;trajZ;trajZdot;trajTheta;trajPhi;trajPsi];
-TrajU = [trajW; trajP; trajR; trajF];
+% state = [sensors.x - trajX; 
+%          sensors.xdot - trajXdot;
+%          sensors.y - trajY;
+%          sensors.ydot - trajXdot;
+%          sensors.z - trajZ; 
+%          sensors.zdot - trajZdot; 
+%          sensors.theta - trajTheta;
+%          sensors.phi - trajPhi;
+%          sensors.psi - trajPsi];
+    
  
 % input = -data.K*state + [trajW; trajP; trajR; trajF];
-input = [trajW; trajP; trajR; trajF];;
+input = [trajW; trajP; trajR; trajF];
+
+
+
 %~~ Correctly plot inputs (Regulated in DesignProblem, but not recorded)~~
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Regulate Pitch Rate

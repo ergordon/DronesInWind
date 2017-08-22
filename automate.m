@@ -1,8 +1,8 @@
 % Constants to be applied
 clear; 
-xFinal = 5;
-yFinal = 5;
-zFinal = 5;
+xFinal = -3;
+yFinal = 1;
+zFinal = 2;
 timeDensity = 400;
 runTime = 4;
 

@@ -326,10 +326,10 @@ r = U(3,1);
 f = U(4,1);
 % compute rates of change
 d_x = xdot;
-d_xdot = (f/process.m)*sin(theta)*cos(phi) + 0; %MODIFICATION: Wind
+d_xdot = (f/process.m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi)) + 0; %MODIFICATION: Wind
 
 d_y = ydot;
-d_ydot = (-f/process.m)*sin(phi);
+d_ydot = (f/process.m)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi));
 
 d_z = zdot;
 d_zdot = (f/process.m)*cos(theta)*cos(phi)-process.g;
