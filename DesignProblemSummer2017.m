@@ -216,7 +216,7 @@ end
 
 function u = GetInput(process,actuators)
 % Copy input from actuators
-u = [actuators.pitchrate; actuators.rollrate; actuators.yawrate; actuators.thrust];
+% u = [actuators.pitchrate; actuators.rollrate; actuators.yawrate; actuators.thrust];
 
 % Initialize inputs to zero
 u = zeros(4,1);
@@ -325,14 +325,24 @@ p = U(2,1);
 r = U(3,1);
 f = U(4,1);
 % compute rates of change
+
+dimensions = [651 651 188];
+A = (dimensions(1)/1000)^2; 
+c_d = 0.05;
+rho = 1.225; %kg/m^3
+
+vel = [xdot;ydot;zdot];
+Fd = (-.5*c_d*rho*A*norm(vel)*vel);
+
+
 d_x = xdot;
-d_xdot = (f/process.m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi)) + 0; %MODIFICATION: Wind
+d_xdot = (f/process.m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi)) +Fd(1)/process.m; %Fd(1)/process.m; %MODIFICATION: Wind
 
 d_y = ydot;
-d_ydot = (f/process.m)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi));
+d_ydot = (f/process.m)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))+Fd(2)/process.m;
 
 d_z = zdot;
-d_zdot = (f/process.m)*cos(theta)*cos(phi)-process.g;
+d_zdot = (f/process.m)*cos(theta)*cos(phi)-process.g+Fd(3)/process.m;
 
 d_theta = w;
 d_phi = p;
@@ -417,7 +427,7 @@ if (isempty(fig))
     box on;
     
 %     view([0 0])  % XZ Plane
-%     view([0,90]) % XY Plane
+    view([0,90]) % XY Plane
 %     view([90,0]) %YZ Plane
      view([45,20])
       % Draws room axis: 
@@ -448,7 +458,7 @@ else
     
       % Draws robot and then robot axis
       fig.robot = DrawMesh(fig.robot,process.pRobot_in0,process.fRobot);
-      fig.robotframe = DrawFrame(fig.robotframe,process.pRobotFrame_in0);
+%       fig.robotframe = DrawFrame(fig.robotframe,process.pRobotFrame_in0);
     
 end
 drawnow;

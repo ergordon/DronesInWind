@@ -9,19 +9,42 @@ yInitial = 0;
 m = mass;
 g = gravity;
 
+dimensions = [651 651 188];
+A = (dimensions(1)/1000)^2; 
+c_d = 0.05;
+rho = 1.225; %kg/m^3
+
+[x_n,y_n] = meshgrid(-5:0.1:5,-5:0.1:5);
+u_n = cos(x_n).*y_n;
+v_n = sin(x_n).*y_n;
+figure
+quiver(x_n,y_n,u_n,v_n)
+
+
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                     Set up function handles                             %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 
 
+
 % Put symbolic EOMs in convenient form
 syms x xdot y ydot z zdot theta phi psi thrust w p r real
+
+vel = [xdot;ydot;zdot];
+pos = [x;y;z];
+
+wind_u = cos(x)*y;
+wind_v = sin(x)*y;
+
+Fd = (-.5*c_d*rho*A*norm(vel)^2 *vel)/norm(vel);
+% Fd = [0;0;0]
+
 f = simplify([xdot; 
-              (thrust/m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi)); 
+              (thrust/m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi))+Fd(1)/m+wind_u; 
               ydot;
-              (thrust/m)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))
+              (thrust/m)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))+Fd(2)/m+wind_v;
               zdot; 
-              (thrust/m)*cos(theta)*cos(phi) - g; 
+              (thrust/m)*cos(theta)*cos(phi)-g+Fd(3)/m;
               w;
               p;
               r]);

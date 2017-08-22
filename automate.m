@@ -1,10 +1,16 @@
 % Constants to be applied
 clear; 
-xFinal = -3;
-yFinal = 1;
-zFinal = 2;
+xFinal = 5;
+yFinal = 0;
+zFinal = 5;
 timeDensity = 400;
 runTime = 4;
+
+% windX = 1;
+% windY = 1;
+% windZ = 1;
+% 
+% wind = [windx;windY;windZ];     % m/s
 
 
 gravity = 9.81;
