@@ -73,7 +73,7 @@ end
 title('Simulation Input')
 xlim([topt(1) topt(end)]);
 grid on
-hl = legend('$\dot{\theta}$','$\dot{\phi}$','$\dot{\psi}$','location','northwest');
+hl = legend('$\dot{\theta}$','$\dot{\phi}$','$\dot{\psi}$','thrust','location','northwest');
 set(hl, 'Interpreter', 'latex');
 % xlabel('$\dot{T}$'),ylabel('$\dot{y}');
 
@@ -87,7 +87,7 @@ title('OptimTraj Input')
 
 xlim([topt(1) topt(end)]);
 grid on
-hl = legend('$\dot{\theta}$','$\dot{\phi}$','$\dot{\psi}$','location','northwest');
+hl = legend('$\dot{\theta}$','$\dot{\phi}$','$\dot{\psi}$','thrust','location','northwest');
 set(hl, 'Interpreter', 'latex');
 
 % 
