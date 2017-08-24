@@ -75,6 +75,7 @@ end
 function [process,controller] = SetupSimulation(process)
 
 load('runOptions')
+
 % DEFINE CONSTANTS
 
 % Constants related to simulation.
@@ -85,7 +86,7 @@ process.tStop = runTime; % MODIFICATION: Runtime
 % - Time step.
 process.tStep = 1/timeDensity; % MODIFICATION: Timestep
 % - Names of things to log in datafile, if desired
-process.processdatatolog = {'t','x','xdot','y','ydot','z','zdot','theta','phi','psi'};
+process.processdatatolog = {'t','x','xdot','y','ydot','z','zdot','theta','thetadot','phi','phidot','psi','psidot'};
 
 % Constants related to physical properties.
 % - Acceleration of gravity.
@@ -96,10 +97,6 @@ process.m = mass;
 process.maxthrust = maxThrust;
 % - Minimum thrust
 process.minthrust = minThrust;
-% - Maximum pitch rate
-process.maxpitchrate = maxPitchRate;
-% - Maximum roll rate
-process.maxrollrate = maxRollRate;
 % - Maximum yaw rate
 process.maxyawrate = maxYawRate;
 
@@ -129,12 +126,15 @@ process.ydot = 0;
 % z, zdot - position and velocity
 process.z = 0;
 process.zdot = 0;
-% theta - angle
-process.theta = 0;
-% phi - angle
+% phi - angle and angular velocity
 process.phi = 0;
-% psi - angle
+process.phidot = 0;
+% theta - angle and angular velocity
+process.theta = 0;
+process.thetadot = 0;
+% psi - angle and angular velocity
 process.psi = 0;
+process.psidot = 0;
 
 % DEFINE CONTROLLER
 
@@ -144,7 +144,7 @@ controller = eval(process.controller);
 controller.name = process.controller;
 % Parameters
 % - define a list of constants that will be passed to the controller
-names = {'tStep','g','m','maxthrust','maxpitchrate','maxrollrate','maxyawrate'};
+names = {'tStep','g','m','maxthrust','minthrust','maxyawrate'};
 % - loop to create a structure with only these constants
 controller.parameters = struct;
 for i=1:length(names)
@@ -197,9 +197,12 @@ sensors.y = process.y;
 sensors.ydot = process.ydot;
 sensors.z = process.z;
 sensors.zdot = process.zdot;
-sensors.theta = process.theta;
 sensors.phi = process.phi;
+sensors.phidot = process.phidot;
+sensors.theta = process.theta;
+sensors.thetadot = process.thetadot;
 sensors.psi = process.psi;
+sensors.psidot = process.psidot;
 % Add noise
 %   (nothing)
 end
@@ -209,58 +212,69 @@ t = process.t;
 x = [process.x; process.xdot;
      process.y; process.ydot; 
      process.z; process.zdot;
-     process.theta; 
-     process.phi;
-     process.psi];
+     process.phi; process.phidot
+     process.theta; process.thetadot
+     process.psi; process.psidot];
 end
 
 function u = GetInput(process,actuators)
 % Copy input from actuators
-% u = [actuators.pitchrate; actuators.rollrate; actuators.yawrate; actuators.thrust];
+ u = [actuators.f1; actuators.f2; actuators.f3; actuators.f4; actuators.r];
 
 % Initialize inputs to zero
-u = zeros(4,1);
+u = zeros(5,1);
 
-% Copy pitch rate from actuators
+% Copy f1 from actuators
 %==========================================================
-if actuators.pitchrate < -process.maxpitchrate
-    u(1) = -process.maxpitchrate;
-elseif actuators.pitchrate > process.maxpitchrate
-    u(1) = process.maxpitchrate;
+if actuators.f1<process.minthrust
+    u(1) = process.minthrust;
+elseif actuators.f1 > process.maxthrust
+    u(1) = process.maxthrust;
 else
-    u(1) = actuators.pitchrate;
+    u(1) = actuators.f1;
 end
 
-% Copy roll rate from actuators
+% Copy f2 from actuators
 %==========================================================
-if actuators.rollrate< -process.maxrollrate
-    u(2) = -process.maxrollrate;
-elseif actuators.rollrate > process.maxrollrate
-    u(2) = process.maxrollrate;
+if actuators.f2<process.minthrust
+    u(2) = process.minthrust;
+elseif actuators.f2 > process.maxthrust
+    u(2) = process.maxthrust;
 else
-    u(2) = actuators.rollrate;
+    u(2) = actuators.f2;
+end
+%==========================================================
+
+% Copy f3 from actuators
+%==========================================================
+if actuators.f3<process.minthrust
+    u(3) = process.minthrust;
+elseif actuators.f3 > process.maxthrust
+    u(3) = process.maxthrust;
+else
+    u(3) = actuators.f3;
 end
 
-% Copy yaw rate from actuators
+% Copy f4 from actuators
 %==========================================================
-if actuators.yawrate< -process.maxyawrate
-    u(3) = -process.maxyawrate;
-elseif actuators.yawrate > process.maxyawrate
-    u(3) = process.maxyawrate;
-else
-    u(3) = actuators.yawrate;
-end
-
-% Copy thrust from actuators
-%==========================================================
-if actuators.thrust<process.minthrust
+if actuators.f4<process.minthrust
     u(4) = process.minthrust;
-elseif actuators.thrust > process.maxthrust
+elseif actuators.f4 > process.maxthrust
     u(4) = process.maxthrust;
 else
-    u(4) = actuators.thrust;
+    u(4) = actuators.f4;
 end
+
+% Copy r from actuators
 %==========================================================
+if actuators.r< -process.maxyawrate
+    u(5) = -process.maxyawrate;
+elseif actuators.r > process.maxyawrate
+    u(5) = process.maxyawrate;
+else
+    u(5) = actuators.r;
+end
+
 % Add disturbance
 %   (nothing)
 end
@@ -273,15 +287,18 @@ process.y = x(3,1);
 process.ydot = x(4,1);
 process.z = x(5,1);
 process.zdot = x(6,1);
-process.theta = x(7,1);
-process.phi = x(8,1);
-process.psi = x(9,1);
+process.phi = x(7,1);
+process.phidot = x(8,1);
+process.theta = x(9,1);
+process.thetadot = x(10,1);
+process.psi = x(11,1);
+process.psidot = x(12,1);
 
 
 % Just did this to shorten, typing. But this will marginally slow sim
 phi = process.phi;
-psi = process.psi;
 theta = process.theta;
+psi = process.psi;
 
 % Frame in origin frame
 o_1in0 = [process.x;process.y;process.z];       % - copied for convenience
@@ -309,6 +326,7 @@ process.pRobotFrame_in0 = R_1in0* process.pRobotFrame_in1 +repmat(o_1in0,1,lengt
 end
 
 function XDOT = GetXDot(T,X,U,process)
+
 % unpack X and U
 x = X(1,1);
 xdot = X(2,1);
@@ -316,45 +334,87 @@ y = X(3,1);
 ydot = X(4,1);
 z = X(5,1);
 zdot = X(6,1);
-theta = X(7,1);
-phi = X(8,1);
-psi = X(9,1);
+phi = X(7,1);
+phidot = X(8,1);
+theta = X(9,1);
+thetadot = X(10,1);
+psi = X(11,1);
+psidot = X(12,1);
 
-w = U(1,1);
-p = U(2,1);
-r = U(3,1);
-f = U(4,1);
-% compute rates of change
+f1 = U(1,1);
+f2 = U(2,1);
+f3 = U(3,1);
+f4 = U(4,1);
+r = U(5,1);
 
-dimensions = [651 651 188];
-A = (dimensions(1)/1000)^2; 
+%compute rates of change
+
+dim_1 = .651;
+dim_2 = .651;
+A = dim_1*dim_2;
 c_d = 0.05;
 rho = 1.225; %kg/m^3
 
 vel = [xdot;ydot;zdot];
 Fd = (-.5*c_d*rho*A*norm(vel)*vel);
 
-
 d_x = xdot;
-d_xdot = (f/process.m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi)) +Fd(1)/process.m; %Fd(1)/process.m; %MODIFICATION: Wind
+d_xdot = ((f1+f2+f3+f4)/process.m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi)) + Fd(1)/process.m;
 
 d_y = ydot;
-d_ydot = (f/process.m)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))+Fd(2)/process.m;
+d_ydot = ((f1+f2+f3+f4)/process.m)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi)) + Fd(2)/process.m;
 
 d_z = zdot;
-d_zdot = (f/process.m)*cos(theta)*cos(phi)-process.g+Fd(3)/process.m;
+d_zdot = ((f1+f2+f3+f4)/process.m)*cos(theta)*cos(phi)-process.g + Fd(3)/process.m;
 
-d_theta = w;
-d_phi = p;
-d_psi = r;
+d_phi = phidot;
+d_phidot = ((thetadot*(psi*cos(theta) - (thetadot*cos(phi)*sin(phi))/2 + (psi*cos(phi)^2*cos(theta))/2 - (psi*cos(theta)*sin(phi)^2)/2) - ...
+    dim_1*(f1 - f3) + (psidot^2*cos(phi)*cos(theta)^2*sin(phi))/2)*(cos(phi)^4*cos(theta)^2 + 2*cos(phi)^2*sin(theta)^2 + cos(theta)^2*sin(phi)^4 + ...
+    sin(phi)^2*sin(theta)^2 + 2*cos(phi)^2*cos(theta)^2*sin(phi)^2))/(cos(phi)^4*cos(theta)^2 + cos(theta)^2*sin(phi)^4 + ...
+    2*cos(phi)^2*cos(theta)^2*sin(phi)^2) + (sin(theta)*(2*cos(phi)^2 + sin(phi)^2)*(r - psidot*(thetadot*cos(theta)*sin(theta) + ...
+    (psidot*cos(phi)*cos(theta)^2*sin(phi))/2 - (thetadot*cos(phi)^2*cos(theta)*sin(theta))/2 - thetadot*cos(theta)*sin(phi)^2*sin(theta)) + ...
+    thetadot*((phidot*cos(theta)*sin(phi)^2)/2 - (phidot*cos(phi)^2*cos(theta))/2 - psidot*cos(theta)*sin(theta) + ...
+    (thetadot*cos(phi)*sin(phi)*sin(theta))/2 + (psidot*cos(phi)^2*cos(theta)*sin(theta))/2 + psidot*cos(theta)*sin(phi)^2*sin(theta)) + ...
+    phidot*(thetadot*cos(theta) - (psi*cos(phi)*cos(theta)^2*sin(phi))/2)))/(cos(phi)^4*cos(theta)^2 + cos(theta)^2*sin(phi)^4 + ...
+    2*cos(phi)^2*cos(theta)^2*sin(phi)^2) + (cos(phi)*sin(phi)*sin(theta)*(phidot*(psi*cos(theta) - (thetadot*cos(phi)*sin(phi))/2 + ...
+    (psi*cos(phi)^2*cos(theta))/2 - (psi*cos(theta)*sin(phi)^2)/2) + dim_2*(f2 - f4) + psidot*((psidot*cos(phi)^2*cos(theta)*sin(theta))/2 - ...
+    psidot*cos(theta)*sin(theta) + psidot*cos(theta)*sin(phi)^2*sin(theta)) - (phidot*thetadot*cos(phi)*sin(phi))/2))/(cos(phi)^4*cos(theta) + ...
+    cos(theta)*sin(phi)^4 + 2*cos(phi)^2*cos(theta)*sin(phi)^2);
 
+d_theta = thetadot;
+d_thetadot = - ((cos(phi)^2 + 2*sin(phi)^2)*(phidot*(psi*cos(theta) - (thetadot*cos(phi)*sin(phi))/2 + (psi*cos(phi)^2*cos(theta))/2 - ...
+    (psi*cos(theta)*sin(phi)^2)/2) + dim_2*(f2 - f4) + psidot*((psidot*cos(phi)^2*cos(theta)*sin(theta))/2 - psidot*cos(theta)*sin(theta) + ...
+    psidot*cos(theta)*sin(phi)^2*sin(theta)) - (phidot*thetadot*cos(phi)*sin(phi))/2))/(cos(phi)^4 + sin(phi)^4 + 2*cos(phi)^2*sin(phi)^2) - ...
+    (cos(phi)*sin(phi)*(r - psidot*(thetadot*cos(theta)*sin(theta) + (psidot*cos(phi)*cos(theta)^2*sin(phi))/2 - ...
+    (thetadot*cos(phi)^2*cos(theta)*sin(theta))/2 - thetadot*cos(theta)*sin(phi)^2*sin(theta)) + thetadot*((phidot*cos(theta)*sin(phi)^2)/2 - ...
+    (phidot*cos(phi)^2*cos(theta))/2 - psidot*cos(theta)*sin(theta) + (thetadot*cos(phi)*sin(phi)*sin(theta))/2 + ...
+    (psidot*cos(phi)^2*cos(theta)*sin(theta))/2 + psidot*cos(theta)*sin(phi)^2*sin(theta)) + phidot*(thetadot*cos(theta) - ...
+    (psi*cos(phi)*cos(theta)^2*sin(phi))/2)))/(cos(phi)^4*cos(theta) + cos(theta)*sin(phi)^4 + 2*cos(phi)^2*cos(theta)*sin(phi)^2) - ...
+    (cos(phi)*sin(phi)*sin(theta)*(thetadot*(psi*cos(theta) - (thetadot*cos(phi)*sin(phi))/2 + (psi*cos(phi)^2*cos(theta))/2 - ...
+    (psi*cos(theta)*sin(phi)^2)/2) - dim_1*(f1 - f3) + (psidot^2*cos(phi)*cos(theta)^2*sin(phi))/2))/(cos(phi)^4*cos(theta) + cos(theta)*sin(phi)^4 + ...
+    2*cos(phi)^2*cos(theta)*sin(phi)^2);
+
+d_psi = psidot;
+d_psidot = ((2*cos(phi)^2 + sin(phi)^2)*(r - psidot*(thetadot*cos(theta)*sin(theta) + (psidot*cos(phi)*cos(theta)^2*sin(phi))/2 - ...
+    (thetadot*cos(phi)^2*cos(theta)*sin(theta))/2 - thetadot*cos(theta)*sin(phi)^2*sin(theta)) + thetadot*((phidot*cos(theta)*sin(phi)^2)/2 - ...
+    (phidot*cos(phi)^2*cos(theta))/2 - psidot*cos(theta)*sin(theta) + (thetadot*cos(phi)*sin(phi)*sin(theta))/2 + ...
+    (psidot*cos(phi)^2*cos(theta)*sin(theta))/2 + psidot*cos(theta)*sin(phi)^2*sin(theta)) + phidot*(thetadot*cos(theta) - ...
+    (psi*cos(phi)*cos(theta)^2*sin(phi))/2)))/(cos(phi)^4*cos(theta)^2 + cos(theta)^2*sin(phi)^4 + 2*cos(phi)^2*cos(theta)^2*sin(phi)^2) + ...
+    (cos(phi)*sin(phi)*(phidot*(psi*cos(theta) - (thetadot*cos(phi)*sin(phi))/2 + (psi*cos(phi)^2*cos(theta))/2 - (psi*cos(theta)*sin(phi)^2)/2) + ...
+    dim_2*(f2 - f4) + psidot*((psidot*cos(phi)^2*cos(theta)*sin(theta))/2 - psidot*cos(theta)*sin(theta) + psidot*cos(theta)*sin(phi)^2*sin(theta)) - ...
+    (phidot*thetadot*cos(phi)*sin(phi))/2))/(cos(phi)^4*cos(theta) + cos(theta)*sin(phi)^4 + 2*cos(phi)^2*cos(theta)*sin(phi)^2) + ...
+    (sin(theta)*(2*cos(phi)^2 + sin(phi)^2)*(thetadot*(psi*cos(theta) - (thetadot*cos(phi)*sin(phi))/2 + (psi*cos(phi)^2*cos(theta))/2 - ...
+    (psi*cos(theta)*sin(phi)^2)/2) - dim_1*(f1 - f3) + (psidot^2*cos(phi)*cos(theta)^2*sin(phi))/2))/(cos(phi)^4*cos(theta)^2 + cos(theta)^2*sin(phi)^4 + ...
+    2*cos(phi)^2*cos(theta)^2*sin(phi)^2);
+% 
 % pack XDOT
+
 XDOT = [d_x; d_xdot; 
         d_y; d_ydot; 
         d_z; d_zdot; 
-        d_theta;
-        d_phi;
-        d_psi];
+        d_phi; d_phidot;
+        d_theta; d_thetadot;
+        d_psi; d_psidot];
 end
 
 function iscorrect = CheckOneActuatorValue(val)
@@ -363,18 +423,20 @@ end
 
 function iscorrect = CheckActuators(actuators)
 iscorrect = false;
-if isfield(actuators,{'thrust'})&&isfield(actuators,{'pitchrate'})...
-        &&isfield(actuators,{'rollrate'})&&isfield(actuators,{'yawrate'})...
-        &&(length(fieldnames(actuators))==4)
-    if CheckOneActuatorValue(actuators.thrust)&&CheckOneActuatorValue(actuators.pitchrate)...
-       &&CheckOneActuatorValue(actuators.rollrate)&&CheckOneActuatorValue(actuators.yawrate)
+if isfield(actuators,{'f1'})&&isfield(actuators,{'f2'})...
+        &&isfield(actuators,{'f3'})&&isfield(actuators,{'f4'})...
+        &&isfield(actuators,{'r'})...
+        &&(length(fieldnames(actuators))==5)
+    if CheckOneActuatorValue(actuators.f1)&&CheckOneActuatorValue(actuators.f2)...
+       &&CheckOneActuatorValue(actuators.f3)&&CheckOneActuatorValue(actuators.f4)...
+       &&CheckOneActuatorValue(actuators.r)
         iscorrect = true;
     end
 end
 end
 
 function actuators = ZeroActuators()
-actuators = struct('thrust',0,'pitchrate',0,'rollrate',0,'yawrate',0);
+actuators = struct('f1',0,'f2',0,'f3',0,'f4',0,'r',0);
 end
 
 function fig = UpdateFigure(process,controller,fig)

@@ -1,5 +1,5 @@
 load('runOptions.mat')
-syms phi theta psi phidot thetadot psidot f1 f2 f3 f4 r
+syms x xdot y ydot z zdot phi theta psi phidot thetadot psidot f1 f2 f3 f4 r real
 M = [Ix 0 -Ix*sin(theta); ...
     0 Iy*cos(phi)^2+Iz*sin(phi)^2 (Iy-Iz)*cos(phi)*sin(phi)*cos(theta); ...
     -Ix*sin(theta) (Iy-Iz)*cos(phi)*sin(phi)*cos(theta)...
@@ -21,7 +21,38 @@ c33 = (Iy-Iz)*psidot*cos(theta)^2*sin(phi)*cos(phi) - Iy*thetadot*sin(phi)^2*cos
     - Iz*thetadot*cos(phi)^2*cos(theta)*sin(theta) + Ix*thetadot*cos(theta)*sin(theta);
 C = [c11 c12 c13; c21 c22 c23; c31 c32 c33];
 
-T = [(f3-f1)*.651; (f4-f2)*.651; r];
+
+T = [(f3-f1)*dim_1; (f4-f2)*dim_2; r];
 
 nddot = inv(M)*(T-C*[phidot; thetadot; psidot]);
-save('runOptions.mat','nddot','-append');
+
+
+pos = [x;y;z];
+% [x_n,y_n] = meshgrid(-5:0.1:5,-5:0.1:5);
+% u_n = cos(x_n).*y_n;
+% v_n = sin(x_n).*y_n;
+% figure
+% quiver(x_n,y_n,u_n,v_n)
+% wind_u = cos(x)*y;
+% wind_v = sin(x)*y;
+
+vel = [xdot;ydot;zdot];
+A = dim_1*dim_2;
+c_d = 0.05;
+rho = 1.225;
+Fd = (-.5*c_d*rho*A*norm(vel)^2 *vel)/norm(vel);
+
+equationsOfMotion = [xdot; 
+                    ((f1+f2+f3+f4)/mass)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi))+Fd(1)/mass;
+                    ydot;
+                    ((f1+f2+f3+f4)/mass)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))+Fd(2)/mass;
+                    zdot; 
+                    ((f1+f2+f3+f4)/mass)*cos(theta)*cos(phi)-gravity+Fd(3)/mass;
+                    phidot;
+                    nddot(1)
+                    thetadot;
+                    nddot(2);
+                    psidot;
+                    nddot(3)];
+
+save('runOptions.mat','equationsOfMotion','-append');

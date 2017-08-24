@@ -6,55 +6,16 @@ xInitial = 0;
 zInitial = 0;
 yInitial = 0;
 
-m = mass;
-g = gravity;
-
-dimensions = [651 651 188];
-A = (dimensions(1)/1000)^2; 
-c_d = 0.05;
-rho = 1.225; %kg/m^3
-
-% [x_n,y_n] = meshgrid(-5:0.1:5,-5:0.1:5);
-% u_n = cos(x_n).*y_n;
-% v_n = sin(x_n).*y_n;
-% figure
-% quiver(x_n,y_n,u_n,v_n)
-
-
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                     Set up function handles                             %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-
-
 
 % Put symbolic EOMs in convenient form
 syms x xdot y ydot z zdot phi theta psi phidot thetadot psidot ...
     f1 f2 f3 f4 r real
 
-vel = [xdot;ydot;zdot];
-pos = [x;y;z];
-
-% wind_u = cos(x)*y;
-% wind_v = sin(x)*y;
-
-Fd = (-.5*c_d*rho*A*norm(vel)^2 *vel)/norm(vel);
-% Fd = [0;0;0]
-
-f = simplify([xdot; 
-              ((f1+f2+f3+f4)/m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi))+Fd(1)/m; %+wind_u; 
-              ydot;
-              ((f1+f2+f3+f4)/m)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))+Fd(2)/m; %+wind_v;
-              zdot; 
-              ((f1+f2+f3+f4)/m)*cos(theta)*cos(phi)-g+Fd(3)/m;
-              phidot;
-              nddot(1)
-              thetadot;
-              nddot(2)
-              psidot;
-              nddot(3)]);
-              
 % Convert EOMs from symbolic to numeric
-numf = matlabFunction(f,'vars',[x xdot y ydot z zdot phi phidot theta...
+numf = matlabFunction(simplify(equationsOfMotion),'vars',[x xdot y ydot z zdot phi phidot theta...
     thetadot psi psidot f1 f2 f3 f4 r]);
 
 problem.func.dynamics = @(t,x,u)( numf(x(1,:), x(2,:), x(3,:), x(4,:), x(5,:),...
@@ -101,8 +62,8 @@ problem.bounds.finalState.upp = [xFinal; 0; yFinal; 0; zFinal; 0;...
                                     0; 0; 0; 0; 0; 0];
 
 
-problem.bounds.control.low = [minThrust; minThrust; minThrust; minThrust; -maxPitchRate];
-problem.bounds.control.upp = [maxThrust; maxThrust; maxThrust; maxThrust; maxPitchRate];
+problem.bounds.control.low = [minThrust; minThrust; minThrust; minThrust; -maxYawRate];
+problem.bounds.control.upp = [maxThrust; maxThrust; maxThrust; maxThrust; maxYawRate];
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                    Initial guess at trajectory                          %
@@ -110,7 +71,7 @@ problem.bounds.control.upp = [maxThrust; maxThrust; maxThrust; maxThrust; maxPit
 
 problem.guess.time = [0,runTime];
 problem.guess.state = [problem.bounds.initialState.low, problem.bounds.finalState.low];
-problem.guess.control = [[m*g/4; m*g/4; m*g/4; m*g/4; 0], [m*g/4; m*g/4; m*g/4; m*g/4; 0]];
+problem.guess.control = [[mass*gravity/4; mass*gravity/4; mass*gravity/4; mass*gravity/4; 0], [mass*gravity/4; mass*gravity/4; mass*gravity/4; mass*gravity/4; 0]];
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%

@@ -7,7 +7,9 @@ close all
 %       .xdot       (x velocity)
 %       .z          (z position)
 %       .zdot       (z velocity)
-%       .theta      (pitch angle)
+%       .phi        (pitch angle)
+%       .theta      (roll angle)
+%       .psi        (yaw angle)
 %
 %   references
 %       
@@ -23,8 +25,11 @@ close all
 %       .whatever       (yours to define - put whatever you want into "data")
 %
 %   actuators
-%       .pitchrate      (pitch angular rate)
-%       .thrust         (net thrust)
+%       .f1             (Thrust of first rotor)
+%       .f2             (Thrust of second rotor)
+%       .f3             (Thrust of third rotor)
+%       .f4             (Thrust of fourth rotor)
+%       .r              (Yaw Moment)
 
 % Do not modify this function.
 func.init = @initControlSystem;
@@ -85,7 +90,6 @@ data.trajW = u(1,:);
 data.trajP = u(2,:);
 data.trajR = u(3,:);
 data.trajF = u(4,:);
-data.index = 1;
 
 load('runOPtions.mat')
 data.minThrust = minThrust;
@@ -95,12 +99,12 @@ data.maxRollRate = maxRollRate;
 data.maxYawRate = maxYawRate;
 
 % Analysis variables
-data.vel_error = .05;  % Required velocity from rest (for both x and z)
+data.vel_error = .5;  % Required velocity from rest (for both x and z)
 data.pos_error = .05;  % Required distance from final position (for both x and z)
 data.endBool = 0;      % Used to only display the end time once
 
 
-data.i = 1;
+data.index = 1;
 
 % Run the controller
 [actuators,data] = runControlSystem(sensors,references,parameters,data);
@@ -113,8 +117,9 @@ function [actuators,data] = runControlSystem(sensors,references,parameters,data)
 % Reference trajectory
 ind = data.index;
 if data.index < length(data.trajT)
-    [data.trajT(data.index), sensors.t]
-    data.index = data.index + 1;
+%     Time_diff = abs(data.trajT(data.index)-sensors.t)
+    
+    data.index = data.index + 1;    
     
     trajX = data.trajX(ind);
     trajXdot = data.trajXdot(ind);
@@ -141,7 +146,7 @@ else
     trajTheta = data.trajTheta(end);
     trajPhi = data.trajPhi(end);
     trajPsi = data.trajPsi(end);
-    
+%     
     
     trajW = 0;
     trajP = 0;
@@ -158,56 +163,57 @@ data.K = lqr(A,B,data.Q,data.R);
 state = [sensors.x - trajX; 
          sensors.xdot - trajXdot;
          sensors.y - trajY;
-         sensors.ydot - trajXdot;
+         sensors.ydot - trajYdot;
          sensors.z - trajZ; 
          sensors.zdot - trajZdot; 
          sensors.theta - trajTheta;
          sensors.phi - trajPhi;
          sensors.psi - trajPsi];
-     
-TrajX = [trajX;trajXdot;trajY;trajYdot;trajZ;trajZdot;trajTheta;trajPhi;trajPsi];
-TrajU = [trajW; trajP; trajR; trajF];
+    
  
 input = -data.K*state + [trajW; trajP; trajR; trajF];
+% input = [trajW; trajP; trajR; trajF];
+
+
 
 %~~ Correctly plot inputs (Regulated in DesignProblem, but not recorded)~~
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% Regulate Pitch Rate
-if input(1) < -data.maxPitchRate
-    input(1) = -data.maxPitchRate;
-elseif input(1) > data.maxPitchRate
-    input(1) = data.maxPitchRate;
-else
-    input(1) = input(1);
-end
-
-% Regulate Roll Rate
-if input(2) < -data.maxRollRate
-    input(2) = -data.maxRollRate;
-elseif input(1) > data.maxRollRate
-    input(2) = data.maxRollRate;
-else
-    input(2) = input(2);
-end
-
-% Regulate Yaw Rate
-if input(3) < -data.maxYawRate
-    input(3) = -data.maxYawRate;
-elseif input(3) > data.maxYawRate
-    input(3) = data.maxYawRate;
-else
-    input(3) = input(3);
-end
-
-
-% Regulate Thrust
-if input(4) < data.minThrust
-    input(4) = data.minThrust;
-elseif input(4) > data.maxThrust
-    input(4) = data.maxThrust;
-else
-    input(4) = input(4);
-end
+% % Regulate Pitch Rate
+% if input(1) < -data.maxPitchRate
+%     input(1) = -data.maxPitchRate;
+% elseif input(1) > data.maxPitchRate
+%     input(1) = data.maxPitchRate;
+% else
+%     input(1) = input(1);
+% end
+% 
+% % Regulate Roll Rate
+% if input(2) < -data.maxRollRate
+%     input(2) = -data.maxRollRate;
+% elseif input(1) > data.maxRollRate
+%     input(2) = data.maxRollRate;
+% else
+%     input(2) = input(2);
+% end
+% 
+% % Regulate Yaw Rate
+% if input(3) < -data.maxYawRate
+%     input(3) = -data.maxYawRate;
+% elseif input(3) > data.maxYawRate
+%     input(3) = data.maxYawRate;
+% else
+%     input(3) = input(3);
+% end
+% 
+% 
+% % Regulate Thrust
+% if input(4) < data.minThrust
+%     input(4) = data.minThrust;
+% elseif input(4) > data.maxThrust
+%     input(4) = data.maxThrust;
+% else
+%     input(4) = input(4);
+% end
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 actuators.pitchrate = input(1);
@@ -229,9 +235,6 @@ if abs(sensors.xdot) < data.vel_error && ...
     fprintf('End State Achieved at: %f seconds\n', data.timeEnd)
     
 end
-
-% position = [sensors.x,sensors.y sensors.z]
-angles = [sensors.theta, sensors.phi, sensors.psi];
 
 
 end

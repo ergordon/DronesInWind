@@ -7,7 +7,9 @@ close all
 %       .xdot       (x velocity)
 %       .z          (z position)
 %       .zdot       (z velocity)
-%       .theta      (pitch angle)
+%       .phi        (pitch angle)
+%       .theta      (roll angle)
+%       .psi        (yaw angle)
 %
 %   references
 %       
@@ -23,8 +25,11 @@ close all
 %       .whatever       (yours to define - put whatever you want into "data")
 %
 %   actuators
-%       .pitchrate      (pitch angular rate)
-%       .thrust         (net thrust)
+%       .f1             (Thrust of first rotor)
+%       .f2             (Thrust of second rotor)
+%       .f3             (Thrust of third rotor)
+%       .f4             (Thrust of fourth rotor)
+%       .r              (Yaw Moment)
 
 % Do not modify this function.
 func.init = @initControlSystem;
