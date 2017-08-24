@@ -14,11 +14,11 @@ A = (dimensions(1)/1000)^2;
 c_d = 0.05;
 rho = 1.225; %kg/m^3
 
-[x_n,y_n] = meshgrid(-5:0.1:5,-5:0.1:5);
-u_n = cos(x_n).*y_n;
-v_n = sin(x_n).*y_n;
-figure
-quiver(x_n,y_n,u_n,v_n)
+% [x_n,y_n] = meshgrid(-5:0.1:5,-5:0.1:5);
+% u_n = cos(x_n).*y_n;
+% v_n = sin(x_n).*y_n;
+% figure
+% quiver(x_n,y_n,u_n,v_n)
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -28,33 +28,39 @@ quiver(x_n,y_n,u_n,v_n)
 
 
 % Put symbolic EOMs in convenient form
-syms x xdot y ydot z zdot theta phi psi thrust w p r real
+syms x xdot y ydot z zdot phi theta psi phidot thetadot psidot ...
+    f1 f2 f3 f4 r real
 
 vel = [xdot;ydot;zdot];
 pos = [x;y;z];
 
-wind_u = cos(x)*y;
-wind_v = sin(x)*y;
+% wind_u = cos(x)*y;
+% wind_v = sin(x)*y;
 
 Fd = (-.5*c_d*rho*A*norm(vel)^2 *vel)/norm(vel);
 % Fd = [0;0;0]
 
 f = simplify([xdot; 
-              (thrust/m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi))+Fd(1)/m+wind_u; 
+              ((f1+f2+f3+f4)/m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi))+Fd(1)/m; %+wind_u; 
               ydot;
-              (thrust/m)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))+Fd(2)/m+wind_v;
+              ((f1+f2+f3+f4)/m)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))+Fd(2)/m; %+wind_v;
               zdot; 
-              (thrust/m)*cos(theta)*cos(phi)-g+Fd(3)/m;
-              w;
-              p;
-              r]);
+              ((f1+f2+f3+f4)/m)*cos(theta)*cos(phi)-g+Fd(3)/m;
+              phidot;
+              nddot(1)
+              thetadot;
+              nddot(2)
+              psidot;
+              nddot(3)]);
               
 % Convert EOMs from symbolic to numeric
-numf = matlabFunction(f,'vars',[x xdot y ydot z zdot theta phi psi w p r thrust]);
+numf = matlabFunction(f,'vars',[x xdot y ydot z zdot phi phidot theta...
+    thetadot psi psidot f1 f2 f3 f4 r]);
 
 problem.func.dynamics = @(t,x,u)( numf(x(1,:), x(2,:), x(3,:), x(4,:), x(5,:),...
                                        x(6,:), x(7,:), x(8,:), x(9,:),...
-                                       u(1,:), u(2,:), u(3,:), u(4,:) ));
+                                       x(10,:), x(11,:), x(12,:),...
+                                       u(1,:), u(2,:), u(3,:), u(4,:), u(5,:) ));
                                    
                                    
                                    
@@ -86,17 +92,17 @@ problem.bounds.finalTime.low = 0;
 problem.bounds.finalTime.upp = runTime;
 
 problem.bounds.initialState.low = [xInitial; 0; yInitial; 0; zInitial; 0;...
-                                    0; 0; 0];
+                                    0; 0; 0; 0; 0; 0];
 problem.bounds.initialState.upp = [xInitial; 0; yInitial; 0; zInitial; 0;...
-                                    0; 0; 0];
+                                    0; 0; 0; 0; 0; 0];
 problem.bounds.finalState.low = [xFinal; 0; yFinal; 0; zFinal; 0;...
-                                    0; 0; 0];
+                                    0; 0; 0; 0; 0; 0];
 problem.bounds.finalState.upp = [xFinal; 0; yFinal; 0; zFinal; 0;...
-                                    0; 0; 0];
+                                    0; 0; 0; 0; 0; 0];
 
 
-problem.bounds.control.low = [-maxPitchRate; -maxRollRate; -maxYawRate; minThrust];
-problem.bounds.control.upp = [maxPitchRate; maxRollRate; maxYawRate; maxThrust];
+problem.bounds.control.low = [minThrust; minThrust; minThrust; minThrust; -maxPitchRate];
+problem.bounds.control.upp = [maxThrust; maxThrust; maxThrust; maxThrust; maxPitchRate];
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                    Initial guess at trajectory                          %
@@ -104,7 +110,7 @@ problem.bounds.control.upp = [maxPitchRate; maxRollRate; maxYawRate; maxThrust];
 
 problem.guess.time = [0,runTime];
 problem.guess.state = [problem.bounds.initialState.low, problem.bounds.finalState.low];
-problem.guess.control = [[0; 0; 0; m*g], [0; 0; 0; m*g]];
+problem.guess.control = [[m*g/4; m*g/4; m*g/4; m*g/4; 0], [m*g/4; m*g/4; m*g/4; m*g/4; 0]];
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -113,7 +119,7 @@ problem.guess.control = [[0; 0; 0; m*g], [0; 0; 0; m*g]];
 
 problem.options.nlpOpt = optimset(...
     'Display','iter',...
-    'MaxFunEvals',1e5);
+    'MaxFunEvals',1e6);
 problem.options.MaxFunctionEvaluations = 100000
 % problem.options.method = 'trapezoid';
 % problem.options.method = 'hermiteSimpson';
@@ -148,10 +154,10 @@ legend('xdot','ydot','zdot');
 
 figure(2)
 subplot(2,1,1)
-plot(t,x(7,:),t,x(8,:),t,x(9,:));
+plot(t,x(7,:),t,x(9,:),t,x(11,:));
 legend('\theta','\phi','\psi')
 subplot(2,1,2);
 plot(t,u);
-legend('pitch rate','roll rate','yaw rate','thrust');
+legend('f1','f2','f3','f4','yaw rate');
 
 save('traj.mat','t','x','u');
