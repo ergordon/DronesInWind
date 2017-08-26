@@ -39,39 +39,21 @@ end
 
 function [actuators,data] = initControlSystem(sensors,references,parameters,data)
 clc;
-% Current angle of the quad and current thrust (this will be passed in from the run function)
-syms Psi theta phi f real
-
+load('runOptions')
+syms x xdot y ydot z zdot phi phidot theta thetadot psi psidot f1 f2 f3 f4 r real
 % Symbolic description of A matrix
-A = [
-0, 1, 0, 0, 0, 0,               0,                                                          0,                                0;
-0, 0, 0, 0, 0, 0, f*cos(phi)*cos(Psi)*cos(theta),  f*(cos(phi)*sin(Psi)-cos(Psi)*sin(phi)*sin(theta)), f*(cos(Psi)*sin(phi)-cos(phi)*sin(Psi)*sin(theta));
-0, 0, 0, 1, 0, 0,               0,                                                          0,                                0;
-0, 0, 0, 0, 0, 0, f*cos(phi)*cos(theta)*sin(Psi), -f*(cos(phi)*cos(Psi) + sin(phi)*sin(Psi)*sin(theta)), f*(sin(phi)*sin(Psi) + cos(phi)*cos(Psi)*sin(theta));
-0, 0, 0, 0, 0, 1,               0,                                                          0,                                0;
-0, 0, 0, 0, 0, 0,      -f*cos(phi)*sin(theta),                                -f*cos(theta)*sin(phi),                         0;
-0, 0, 0, 0, 0, 0,               0,                                                          0,                                0;
-0, 0, 0, 0, 0, 0,               0,                                                          0,                                0;
-0, 0, 0, 0, 0, 0,               0,                                                          0,                                0];
+A = jacobian(equationsOfMotion,state_sym);
 % Symbolic description of B matrix
-B = [
-0, 0, 0,                   0;
-0, 0, 0, sin(phi)*sin(Psi) + cos(phi)*cos(Psi)*sin(theta);
-0, 0, 0,                   0;
-0, 0, 0, cos(phi)*sin(Psi)*sin(theta) - cos(Psi)*sin(phi);
-0, 0, 0,                   0;
-0, 0, 0,           cos(phi)*cos(theta);
-1, 0, 0,                   0;
-0, 1, 0,                   0;
-0, 0, 1,                   0];
- 
+B = jacobian(equationsOfMotion,inputs_sym);
+
 % Create functions
-data.funcA = matlabFunction(A);     %(f,phi,Psi,theta)
-data.funcB = matlabFunction(B);     %(phi,Psi,theta)
+data.funcA = matlabFunction(A,'Vars',[xdot ydot zdot phi phidot theta thetadot state_sym(11) psidot f1 f2 f3 f4 r]);
+data.funcB = matlabFunction(B,'Vars',[phi theta state_sym(11)]);
 
 % Initialize LQR matrices
-data.Q = 200*eye(9);
-data.R = eye(4);
+data.Q = 200*eye(length(A));
+sizeB = size(B);
+data.R = eye(sizeB(2));
 
 % Trajectory
 load('traj.mat')
@@ -82,20 +64,21 @@ data.trajY = x(3,:);
 data.trajYdot = x(4,:);
 data.trajZ = x(5,:);
 data.trajZdot = x(6,:);
-data.trajTheta = x(7,:);
-data.trajPhi = x(8,:);
-data.trajPsi = x(9,:);
+data.trajPhi = x(7,:);
+data.trajPhidot = x(8,:);
+data.trajTheta = x(9,:);
+data.trajThetadot = x(10,:);
+data.trajPsi = x(11,:);
+data.trajPsidot = x(12,:);
 
-data.trajW = u(1,:);
-data.trajP = u(2,:);
-data.trajR = u(3,:);
-data.trajF = u(4,:);
+data.trajF1 = u(1,:);
+data.trajF2 = u(2,:);
+data.trajF3 = u(3,:);
+data.trajF4 = u(4,:);
+data.trajR = u(5,:);
 
-load('runOPtions.mat')
 data.minThrust = minThrust;
 data.maxThrust = maxThrust;
-data.maxPitchRate = maxPitchRate;
-data.maxRollRate = maxRollRate;
 data.maxYawRate = maxYawRate;
 
 % Analysis variables
@@ -117,7 +100,7 @@ function [actuators,data] = runControlSystem(sensors,references,parameters,data)
 % Reference trajectory
 ind = data.index;
 if data.index < length(data.trajT)
-%     Time_diff = abs(data.trajT(data.index)-sensors.t)
+%   Time_diff = abs(data.trajT(data.index)-sensors.t)
     
     data.index = data.index + 1;    
     
@@ -127,14 +110,18 @@ if data.index < length(data.trajT)
     trajYdot = data.trajYdot(ind);
     trajZ = data.trajZ(ind);
     trajZdot = data.trajZdot(ind);
-    trajTheta = data.trajTheta(ind);
     trajPhi = data.trajPhi(ind);
+    trajPhidot = data.trajPhidot(ind);
+    trajTheta = data.trajTheta(ind);
+    trajThetadot = data.trajThetadot(ind);
     trajPsi = data.trajPsi(ind);
+    trajPsidot = data.trajPsidot(ind);
     
-    trajW = data.trajW(ind);
-    trajP = data.trajP(ind);
+    trajF1 = data.trajF1(ind);
+    trajF2 = data.trajF2(ind);
+    trajF3 = data.trajF3(ind);
+    trajF4 = data.trajF4(ind);
     trajR = data.trajR(ind);
-    trajF = data.trajF(ind);
 else
     
     trajX = data.trajX(end);
@@ -143,20 +130,24 @@ else
     trajYdot = data.trajYdot(end);
     trajZ = data.trajZ(end);
     trajZdot = data.trajZdot(end);
-    trajTheta = data.trajTheta(end);
     trajPhi = data.trajPhi(end);
+    trajPhidot = data.trajPhidot(end);
+    trajTheta = data.trajTheta(end);
+    trajThetadot = data.trajThetadot(end);
     trajPsi = data.trajPsi(end);
-%     
+    trajPsidot = data.trajPsidot(end);
     
-    trajW = 0;
-    trajP = 0;
+    trajF1 = parameters.m*parameters.g/4;
+    trajF2 = parameters.m*parameters.g/4;
+    trajF3 = parameters.m*parameters.g/4;
+    trajF4 = parameters.m*parameters.g/4;
     trajR = 0;
-    trajF = parameters.m*parameters.g;
     
 end
 
-A = data.funcA(trajPsi,trajF,trajPhi,trajTheta);
-B = data.funcB(trajPsi,trajPhi,trajTheta);
+A = data.funcA(trajXdot, trajYdot, trajZdot, trajPhi, trajPhidot, trajTheta, trajThetadot, trajPsi, trajPsidot, trajF1, trajF2, trajF3, trajF4, trajR);
+B = data.funcB(trajPhi,trajTheta,trajPsi);
+
 data.K = lqr(A,B,data.Q,data.R);
 
 % Calculate and apply input
@@ -166,13 +157,15 @@ state = [sensors.x - trajX;
          sensors.ydot - trajYdot;
          sensors.z - trajZ; 
          sensors.zdot - trajZdot; 
-         sensors.theta - trajTheta;
          sensors.phi - trajPhi;
-         sensors.psi - trajPsi];
+         sensors.phidot - trajPhidot;
+         sensors.theta - trajTheta;
+         sensors.thetadot - trajThetadot;
+         sensors.psi - trajPsi
+         sensors.psidot - trajPsidot];
     
  
-input = -data.K*state + [trajW; trajP; trajR; trajF];
-% input = [trajW; trajP; trajR; trajF];
+input = -data.K*state + [trajF1; trajF2; trajF3; trajF4; trajR];
 
 
 
@@ -216,14 +209,16 @@ input = -data.K*state + [trajW; trajP; trajR; trajF];
 % end
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-actuators.pitchrate = input(1);
-actuators.rollrate = input(2);
-actuators.yawrate = input(3);
-actuators.thrust = input(4);
+actuators.f1 = input(1);
+actuators.f2 = input(2);
+actuators.f3 = input(3);
+actuators.f4 = input(4);
+actuators.r = input(5);
 
 
 % Display when the quad has reached the goal state
 if abs(sensors.xdot) < data.vel_error && ...
+        abs(sensors.ydot) < data.vel_error && ...
         abs(sensors.zdot) < data.vel_error && ...
         abs(sensors.x - data.trajX(end)) < data.pos_error && ...
         abs(sensors.y - data.trajY(end)) < data.pos_error && ...
@@ -231,7 +226,7 @@ if abs(sensors.xdot) < data.vel_error && ...
         data.endBool == 0
     data.endBool = 1;
     data.timeEnd = sensors.t;
-    position = [sensors.x,sensors.y sensors.z]
+    position = [sensors.x,sensors.y sensors.z];
     fprintf('End State Achieved at: %f seconds\n', data.timeEnd)
     
 end

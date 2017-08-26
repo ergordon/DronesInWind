@@ -24,5 +24,5 @@ save('runOptions.mat');
 %Run the four scripts
 eoms()
 planOptimalTrajectory()
-% DesignProblemSummer2017('Controller','datafile','data.mat')
-% AnalysisOfOptimalTrajectory()
+DesignProblemSummer2017('Controller','datafile','data.mat')
+AnalysisOfOptimalTrajectory()

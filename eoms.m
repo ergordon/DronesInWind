@@ -1,5 +1,7 @@
 load('runOptions.mat')
-syms x xdot y ydot z zdot phi theta psi phidot thetadot psidot f1 f2 f3 f4 r real
+syms x xdot y ydot z zdot phi phidot theta thetadot psi psidot f1 f2 f3 f4 r real
+state_sym = [x; xdot; y; ydot; z; zdot; phi; phidot; theta; thetadot; psi; psidot];
+inputs_sym = [f1 f2 f3 f4 r];
 M = [Ix 0 -Ix*sin(theta); ...
     0 Iy*cos(phi)^2+Iz*sin(phi)^2 (Iy-Iz)*cos(phi)*sin(phi)*cos(theta); ...
     -Ix*sin(theta) (Iy-Iz)*cos(phi)*sin(phi)*cos(theta)...
@@ -43,11 +45,11 @@ rho = 1.225;
 Fd = (-.5*c_d*rho*A*norm(vel)^2 *vel)/norm(vel);
 
 equationsOfMotion = [xdot; 
-                    ((f1+f2+f3+f4)/mass)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi))+Fd(1)/mass;
+                    ((f1+f2+f3+f4)/mass)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi))%+Fd(1)/mass;
                     ydot;
-                    ((f1+f2+f3+f4)/mass)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))+Fd(2)/mass;
+                    ((f1+f2+f3+f4)/mass)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi))%+Fd(2)/mass;
                     zdot; 
-                    ((f1+f2+f3+f4)/mass)*cos(theta)*cos(phi)-gravity+Fd(3)/mass;
+                    ((f1+f2+f3+f4)/mass)*cos(theta)*cos(phi)-gravity%+Fd(3)/mass;
                     phidot;
                     nddot(1)
                     thetadot;
@@ -55,4 +57,4 @@ equationsOfMotion = [xdot;
                     psidot;
                     nddot(3)];
 
-save('runOptions.mat','equationsOfMotion','-append');
+save('runOptions.mat','equationsOfMotion','state_sym','inputs_sym','-append');

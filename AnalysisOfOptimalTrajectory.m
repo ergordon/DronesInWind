@@ -11,13 +11,14 @@ tsim = processdata.t;
 xsim = [processdata.x; processdata.xdot;
         processdata.y; processdata.ydot;
         processdata.z; processdata.zdot; 
-        processdata.theta
-        processdata.phi;
-        processdata.psi];
-usim = [controllerdata.actuators.pitchrate; 
-        controllerdata.actuators.rollrate;
-        controllerdata.actuators.yawrate;
-        controllerdata.actuators.thrust];
+        processdata.phi; processdata.phidot;
+        processdata.theta; processdata.thetadot
+        processdata.psi; processdata.psidot];
+usim = [controllerdata.actuators.f1; 
+        controllerdata.actuators.f2;
+        controllerdata.actuators.f3;
+        controllerdata.actuators.f4
+        controllerdata.actuators.r];
 
 clf;
 
@@ -29,7 +30,8 @@ for i = 1:6
     hold on
 end
 title('Simulation Pos & Vel')
-legend('x','xdot','y','ydot','z','zdot','location','northwest')
+hl = legend('x','$\dot{x}$','y','$\dot{y}$','z','$\dot{z}$','location','northwest');
+set(hl, 'Interpreter', 'latex');
 grid on
 xlim([topt(1) topt(end)]);
 subplot(2,1,2)
@@ -39,47 +41,50 @@ for i = 1:6
 end
 title('OptimTraj Pos & Vel')
 xlim([topt(1) topt(end)]);
-legend('x','xdot','y','ydot','z','zdot','location','northwest')
+hl = legend('x','$\dot{x}$','y','$\dot{y}$','z','$\dot{z}$','location','northwest');
+set(hl, 'Interpreter', 'latex');
 grid on
 
 figure(2)
 subplot(2,1,1)
-for i = 7:9
+for i = 7:12
     plot(tsim,xsim(i,:))
     hold on
 end
 title('Simulation Angles')
-legend('\theta','\phi','\psi','location','southwest')
+hl = legend('$\phi$','$\dot{\phi}$','$\theta$','$\dot{\theta}$','$\psi$','$\dot{\psi}$','location','southwest');
+set(hl, 'Interpreter', 'latex');
 xlim([topt(1) topt(end)]);
 grid on
 subplot(2,1,2)
-for i = 7:9
+for i = 7:12
     plot(topt,xopt(i,:))
     hold on
 end
 title('OptimTraj Angles')
 
 xlim([topt(1) topt(end)]);
-legend('\theta','\phi','\psi','location','southwest')
+hl = legend('$\phi$','$\dot{\phi}$','$\theta$','$\dot{\theta}$','$\psi$','$\dot{\psi}$','location','southwest');
+set(hl, 'Interpreter', 'latex');
 grid on
 
 
 figure(3)
 subplot(2,1,1)
-for i = 1:4
+for i = 1:5
     plot(tsim,usim(i,:))
     hold on
 end
 title('Simulation Input')
 xlim([topt(1) topt(end)]);
 grid on
-hl = legend('$\dot{\theta}$','$\dot{\phi}$','$\dot{\psi}$','thrust','location','northwest');
+hl = legend('f1','f2','f3','f4','r','location','northwest');
 set(hl, 'Interpreter', 'latex');
 % xlabel('$\dot{T}$'),ylabel('$\dot{y}');
 
 grid on
 subplot(2,1,2)
-for i = 1:4
+for i = 1:5
     plot(topt,uopt(i,:))
     hold on
 end
@@ -87,7 +92,7 @@ title('OptimTraj Input')
 
 xlim([topt(1) topt(end)]);
 grid on
-hl = legend('$\dot{\theta}$','$\dot{\phi}$','$\dot{\psi}$','thrust','location','northwest');
+hl = legend('f1','f2','f3','f4','r','location','northwest');
 set(hl, 'Interpreter', 'latex');
 
 % 
