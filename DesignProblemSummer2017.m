@@ -97,8 +97,6 @@ process.m = mass;
 process.maxthrust = maxThrust;
 % - Minimum thrust
 process.minthrust = minThrust;
-% - Maximum yaw rate
-process.maxyawrate = maxYawRate;
 
 % DEFINE GEOMETRY
 % Geometry of quadrotor
@@ -144,7 +142,7 @@ controller = eval(process.controller);
 controller.name = process.controller;
 % Parameters
 % - define a list of constants that will be passed to the controller
-names = {'tStep','g','m','maxthrust','minthrust','maxyawrate'};
+names = {'tStep','g','m','maxthrust','minthrust'};
 % - loop to create a structure with only these constants
 controller.parameters = struct;
 for i=1:length(names)
@@ -219,10 +217,10 @@ end
 
 function u = GetInput(process,actuators)
 % Copy input from actuators
- u = [actuators.f1; actuators.f2; actuators.f3; actuators.f4; actuators.r];
+ u = [actuators.f1; actuators.f2; actuators.f3; actuators.f4];
 
 % Initialize inputs to zero
-u = zeros(5,1);
+u = zeros(4,1);
 
 % Copy f1 from actuators
 %==========================================================
@@ -265,15 +263,6 @@ else
     u(4) = actuators.f4;
 end
 
-% Copy r from actuators
-%==========================================================
-if actuators.r< -process.maxyawrate
-    u(5) = -process.maxyawrate;
-elseif actuators.r > process.maxyawrate
-    u(5) = process.maxyawrate;
-else
-    u(5) = actuators.r;
-end
 
 % Add disturbance
 %   (nothing)
@@ -281,6 +270,7 @@ end
 
 function process = Get_Process_From_TandX(t,x,process)
 process.t = t;
+
 process.x = x(1,1);
 process.xdot = x(2,1);
 process.y = x(3,1);
@@ -345,7 +335,7 @@ f1 = U(1,1);
 f2 = U(2,1);
 f3 = U(3,1);
 f4 = U(4,1);
-r = U(5,1);
+
 
 %compute rates of change
 
@@ -356,7 +346,7 @@ c_d = 0.05;
 rho = 1.225; %kg/m^3
 
 vel = [xdot;ydot;zdot];
-Fd = (-.5*c_d*rho*A*norm(vel)*vel);
+Fd = [0;0;0]; %(-.5*c_d*rho*A*norm(vel)*vel);
 
 d_x = xdot;
 d_xdot = ((f1+f2+f3+f4)/process.m)*(cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi)) + Fd(1)/process.m;
@@ -367,45 +357,14 @@ d_ydot = ((f1+f2+f3+f4)/process.m)*(sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(ph
 d_z = zdot;
 d_zdot = ((f1+f2+f3+f4)/process.m)*cos(theta)*cos(phi)-process.g + Fd(3)/process.m;
 
-d_phi = phidot;
-d_phidot = ((thetadot*(psi*cos(theta) - (thetadot*cos(phi)*sin(phi))/2 + (psi*cos(phi)^2*cos(theta))/2 - (psi*cos(theta)*sin(phi)^2)/2) - ...
-    dim_1*(f1 - f3) + (psidot^2*cos(phi)*cos(theta)^2*sin(phi))/2)*(cos(phi)^4*cos(theta)^2 + 2*cos(phi)^2*sin(theta)^2 + cos(theta)^2*sin(phi)^4 + ...
-    sin(phi)^2*sin(theta)^2 + 2*cos(phi)^2*cos(theta)^2*sin(phi)^2))/(cos(phi)^4*cos(theta)^2 + cos(theta)^2*sin(phi)^4 + ...
-    2*cos(phi)^2*cos(theta)^2*sin(phi)^2) + (sin(theta)*(2*cos(phi)^2 + sin(phi)^2)*(r - psidot*(thetadot*cos(theta)*sin(theta) + ...
-    (psidot*cos(phi)*cos(theta)^2*sin(phi))/2 - (thetadot*cos(phi)^2*cos(theta)*sin(theta))/2 - thetadot*cos(theta)*sin(phi)^2*sin(theta)) + ...
-    thetadot*((phidot*cos(theta)*sin(phi)^2)/2 - (phidot*cos(phi)^2*cos(theta))/2 - psidot*cos(theta)*sin(theta) + ...
-    (thetadot*cos(phi)*sin(phi)*sin(theta))/2 + (psidot*cos(phi)^2*cos(theta)*sin(theta))/2 + psidot*cos(theta)*sin(phi)^2*sin(theta)) + ...
-    phidot*(thetadot*cos(theta) - (psi*cos(phi)*cos(theta)^2*sin(phi))/2)))/(cos(phi)^4*cos(theta)^2 + cos(theta)^2*sin(phi)^4 + ...
-    2*cos(phi)^2*cos(theta)^2*sin(phi)^2) + (cos(phi)*sin(phi)*sin(theta)*(phidot*(psi*cos(theta) - (thetadot*cos(phi)*sin(phi))/2 + ...
-    (psi*cos(phi)^2*cos(theta))/2 - (psi*cos(theta)*sin(phi)^2)/2) + dim_2*(f2 - f4) + psidot*((psidot*cos(phi)^2*cos(theta)*sin(theta))/2 - ...
-    psidot*cos(theta)*sin(theta) + psidot*cos(theta)*sin(phi)^2*sin(theta)) - (phidot*thetadot*cos(phi)*sin(phi))/2))/(cos(phi)^4*cos(theta) + ...
-    cos(theta)*sin(phi)^4 + 2*cos(phi)^2*cos(theta)*sin(phi)^2);
+d_phi =  phidot + (psidot*cos(phi)*sin(theta))/(cos(phi)^2*cos(theta) + cos(theta)*sin(phi)^2) + (thetadot*sin(phi)*sin(theta))/(cos(phi)^2*cos(theta) + cos(theta)*sin(phi)^2);
+d_phidot = (651*f3)/1000 - (651*f1)/1000;
 
-d_theta = thetadot;
-d_thetadot = - ((cos(phi)^2 + 2*sin(phi)^2)*(phidot*(psi*cos(theta) - (thetadot*cos(phi)*sin(phi))/2 + (psi*cos(phi)^2*cos(theta))/2 - ...
-    (psi*cos(theta)*sin(phi)^2)/2) + dim_2*(f2 - f4) + psidot*((psidot*cos(phi)^2*cos(theta)*sin(theta))/2 - psidot*cos(theta)*sin(theta) + ...
-    psidot*cos(theta)*sin(phi)^2*sin(theta)) - (phidot*thetadot*cos(phi)*sin(phi))/2))/(cos(phi)^4 + sin(phi)^4 + 2*cos(phi)^2*sin(phi)^2) - ...
-    (cos(phi)*sin(phi)*(r - psidot*(thetadot*cos(theta)*sin(theta) + (psidot*cos(phi)*cos(theta)^2*sin(phi))/2 - ...
-    (thetadot*cos(phi)^2*cos(theta)*sin(theta))/2 - thetadot*cos(theta)*sin(phi)^2*sin(theta)) + thetadot*((phidot*cos(theta)*sin(phi)^2)/2 - ...
-    (phidot*cos(phi)^2*cos(theta))/2 - psidot*cos(theta)*sin(theta) + (thetadot*cos(phi)*sin(phi)*sin(theta))/2 + ...
-    (psidot*cos(phi)^2*cos(theta)*sin(theta))/2 + psidot*cos(theta)*sin(phi)^2*sin(theta)) + phidot*(thetadot*cos(theta) - ...
-    (psi*cos(phi)*cos(theta)^2*sin(phi))/2)))/(cos(phi)^4*cos(theta) + cos(theta)*sin(phi)^4 + 2*cos(phi)^2*cos(theta)*sin(phi)^2) - ...
-    (cos(phi)*sin(phi)*sin(theta)*(thetadot*(psi*cos(theta) - (thetadot*cos(phi)*sin(phi))/2 + (psi*cos(phi)^2*cos(theta))/2 - ...
-    (psi*cos(theta)*sin(phi)^2)/2) - dim_1*(f1 - f3) + (psidot^2*cos(phi)*cos(theta)^2*sin(phi))/2))/(cos(phi)^4*cos(theta) + cos(theta)*sin(phi)^4 + ...
-    2*cos(phi)^2*cos(theta)*sin(phi)^2);
+d_theta = (thetadot*cos(phi))/(cos(phi)^2 + sin(phi)^2) - (psidot*sin(phi))/(cos(phi)^2 + sin(phi)^2);
+d_thetadot = (651*f4)/1000 - (651*f2)/1000;
 
-d_psi = psidot;
-d_psidot = ((2*cos(phi)^2 + sin(phi)^2)*(r - psidot*(thetadot*cos(theta)*sin(theta) + (psidot*cos(phi)*cos(theta)^2*sin(phi))/2 - ...
-    (thetadot*cos(phi)^2*cos(theta)*sin(theta))/2 - thetadot*cos(theta)*sin(phi)^2*sin(theta)) + thetadot*((phidot*cos(theta)*sin(phi)^2)/2 - ...
-    (phidot*cos(phi)^2*cos(theta))/2 - psidot*cos(theta)*sin(theta) + (thetadot*cos(phi)*sin(phi)*sin(theta))/2 + ...
-    (psidot*cos(phi)^2*cos(theta)*sin(theta))/2 + psidot*cos(theta)*sin(phi)^2*sin(theta)) + phidot*(thetadot*cos(theta) - ...
-    (psi*cos(phi)*cos(theta)^2*sin(phi))/2)))/(cos(phi)^4*cos(theta)^2 + cos(theta)^2*sin(phi)^4 + 2*cos(phi)^2*cos(theta)^2*sin(phi)^2) + ...
-    (cos(phi)*sin(phi)*(phidot*(psi*cos(theta) - (thetadot*cos(phi)*sin(phi))/2 + (psi*cos(phi)^2*cos(theta))/2 - (psi*cos(theta)*sin(phi)^2)/2) + ...
-    dim_2*(f2 - f4) + psidot*((psidot*cos(phi)^2*cos(theta)*sin(theta))/2 - psidot*cos(theta)*sin(theta) + psidot*cos(theta)*sin(phi)^2*sin(theta)) - ...
-    (phidot*thetadot*cos(phi)*sin(phi))/2))/(cos(phi)^4*cos(theta) + cos(theta)*sin(phi)^4 + 2*cos(phi)^2*cos(theta)*sin(phi)^2) + ...
-    (sin(theta)*(2*cos(phi)^2 + sin(phi)^2)*(thetadot*(psi*cos(theta) - (thetadot*cos(phi)*sin(phi))/2 + (psi*cos(phi)^2*cos(theta))/2 - ...
-    (psi*cos(theta)*sin(phi)^2)/2) - dim_1*(f1 - f3) + (psidot^2*cos(phi)*cos(theta)^2*sin(phi))/2))/(cos(phi)^4*cos(theta)^2 + cos(theta)^2*sin(phi)^4 + ...
-    2*cos(phi)^2*cos(theta)^2*sin(phi)^2);
+d_psi = (psidot*cos(phi))/(cos(phi)^2*cos(theta) + cos(theta)*sin(phi)^2) + (thetadot*sin(phi))/(cos(phi)^2*cos(theta) + cos(theta)*sin(phi)^2);
+d_psidot = f1 - f2 + f3 - f4;
 % 
 % pack XDOT
 
@@ -425,18 +384,16 @@ function iscorrect = CheckActuators(actuators)
 iscorrect = false;
 if isfield(actuators,{'f1'})&&isfield(actuators,{'f2'})...
         &&isfield(actuators,{'f3'})&&isfield(actuators,{'f4'})...
-        &&isfield(actuators,{'r'})...
-        &&(length(fieldnames(actuators))==5)
+        &&(length(fieldnames(actuators))==4)
     if CheckOneActuatorValue(actuators.f1)&&CheckOneActuatorValue(actuators.f2)...
        &&CheckOneActuatorValue(actuators.f3)&&CheckOneActuatorValue(actuators.f4)...
-       &&CheckOneActuatorValue(actuators.r)
         iscorrect = true;
     end
 end
 end
 
 function actuators = ZeroActuators()
-actuators = struct('f1',0,'f2',0,'f3',0,'f4',0,'r',0);
+actuators = struct('f1',0,'f2',0,'f3',0,'f4',0);
 end
 
 function fig = UpdateFigure(process,controller,fig)

@@ -8,11 +8,12 @@ uopt = u;
 
 load data
 tsim = processdata.t;
-xsim = [processdata.x; processdata.y; processdata.z;
-        processdata.xdot; processdata.ydot; processdata.zdot; 
-        processdata.phi; processdata.theta;processdata.psi;
-        processdata.phidot; processdata.thetadot; processdata.psidot];
-    
+xsim = [processdata.x; process.yprocessdata.xdot;
+        processdata.y; processdata.ydot;
+        processdata.z; processdata.zdot; 
+        processdata.phi; processdata.phidot;
+        processdata.theta; processdata.thetadot
+        processdata.psi; processdata.psidot];
 usim = [controllerdata.actuators.f1; 
         controllerdata.actuators.f2;
         controllerdata.actuators.f3;
@@ -28,7 +29,7 @@ for i = 1:6
     hold on
 end
 title('Simulation Pos & Vel')
-hl = legend('x','y','z','$\dot{x}$','$\dot{y}$','$\dot{z}$','location','northwest');
+hl = legend('x','$\dot{x}$','y','$\dot{y}$','z','$\dot{z}$','location','northwest');
 set(hl, 'Interpreter', 'latex');
 grid on
 xlim([topt(1) topt(end)]);
@@ -38,8 +39,8 @@ for i = 1:6
     hold on
 end
 title('OptimTraj Pos & Vel')
-% xlim([topt(1) topt(end)]);
-hl = legend('x','y','z','$\dot{x}$','$\dot{y}$','$\dot{z}$','location','northwest');
+xlim([topt(1) topt(end)]);
+hl = legend('x','$\dot{x}$','y','$\dot{y}$','z','$\dot{z}$','location','northwest');
 set(hl, 'Interpreter', 'latex');
 grid on
 
@@ -50,9 +51,9 @@ for i = 7:12
     hold on
 end
 title('Simulation Angles')
-hl = legend('$\phi$','$\psi$','$\theta$','$\dot{\phi}$','$\dot{\theta}$','$\dot{\psi}$','location','southwest');
+hl = legend('$\phi$','$\dot{\phi}$','$\theta$','$\dot{\theta}$','$\psi$','$\dot{\psi}$','location','southwest');
 set(hl, 'Interpreter', 'latex');
-% xlim([topt(1) topt(end)]);
+xlim([topt(1) topt(end)]);
 ylim([-2 2])
 grid on
 subplot(2,1,2)
@@ -62,8 +63,8 @@ for i = 7:12
 end
 title('OptimTraj Angles')
 
-% xlim([topt(1) topt(end)]);
-hl = legend('$\phi$','$\psi$','$\theta$','$\dot{\phi}$','$\dot{\theta}$','$\dot{\psi}$','location','southwest');
+xlim([topt(1) topt(end)]);
+hl = legend('$\phi$','$\dot{\phi}$','$\theta$','$\dot{\theta}$','$\psi$','$\dot{\psi}$','location','southwest');
 set(hl, 'Interpreter', 'latex');
 grid on
 
@@ -75,7 +76,7 @@ for i = 1:4
     hold on
 end
 title('Simulation Input')
-% xlim([topt(1) topt(end)]);
+xlim([topt(1) topt(end)]);
 % ylim([-10 10])
 grid on
 hl = legend('w1','w2','w3','w4','location','northwest');
@@ -90,7 +91,7 @@ for i = 1:4
 end
 title('OptimTraj Input')
 
-% xlim([topt(1) topt(end)]);
+xlim([topt(1) topt(end)]);
 grid on
 hl = legend('w1','w2','w3','w4','location','northwest');
 set(hl, 'Interpreter', 'latex');

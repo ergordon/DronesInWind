@@ -48,13 +48,12 @@ B = jacobian(equationsOfMotion,inputs_sym);
 % Create functions
 data.funcA = matlabFunction(A,'Vars',[xdot ydot zdot phi theta state_sym(11) phidot thetadot psidot f1 f2 f3 f4]);
 data.funcB = matlabFunction(B,'Vars',[phi theta state_sym(11)]);
-data.funcA;
+data.funcA
 data.funcB;
 % Initialize LQR matrices
 data.Q = 200*eye(length(A));
 sizeB = size(B);
 data.R = eye(sizeB(2));
-
 
 % Trajectory
 load('traj.mat')
@@ -85,7 +84,7 @@ data.maxThrust = maxThrust;
 
 % Analysis variables
 data.vel_error = .5;  % Required velocity from rest (for both x and z)
-data.pos_error = .5;  % Required distance from final position (for both x and z)
+data.pos_error = .05;  % Required distance from final position (for both x and z)
 data.endBool = 0;      % Used to only display the end time once
 
 
@@ -101,11 +100,10 @@ function [actuators,data] = runControlSystem(sensors,references,parameters,data)
 
 % Reference trajectory
 ind = data.index;
-if data.index <= length(data.trajT)
-  Time_diff = abs(data.trajT(data.index)-sensors.t);
+if data.index < length(data.trajT)
+%   Time_diff = abs(data.trajT(data.index)-sensors.t)
     
-    data.index = data.index + 1;
-    data.index;
+    data.index = data.index + 1;    
     
     trajX = data.trajX(ind);
     trajXdot = data.trajXdot(ind);
@@ -148,7 +146,7 @@ else
     
 end
 
-A = data.funcA(trajXdot, trajYdot, trajZdot, trajPhi, trajTheta, trajPsi, trajPhidot, trajThetadot, trajPsidot, trajF1, trajF2, trajF3, trajF4);
+A = data.funcA(trajXdot, trajYdot, trajZdot, trajPhi, trajTheta, trajPsi, trajThetadot,  trajPsidot, trajF1, trajF2, trajF3, trajF4);
 B = data.funcB(trajPhi,trajTheta,trajPsi);
 
 data.K = lqr(A,B,data.Q,data.R);
@@ -168,23 +166,49 @@ state = [sensors.x - trajX;
          sensors.psidot - trajPsidot];
     
  
-input = -data.K*state + [trajF1; trajF2; trajF3; trajF4];
-% input = [trajF1; trajF2; trajF3; trajF4]
+% input = -data.K*state + [trajF1; trajF2; trajF3; trajF4];
+input = [trajF1; trajF2; trajF3; trajF4];
+
+
+%~~ Correctly plot inputs (Regulated in DesignProblem, but not recorded)~~
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% % Regulate Pitch Rate
+% if input(1) < -data.maxPitchRate
+%     input(1) = -data.maxPitchRate;
+% elseif input(1) > data.maxPitchRate
+%     input(1) = data.maxPitchRate;
+% else
+%     input(1) = input(1);
+% end
 % 
-
-% ~~ Correctly plot inputs (Regulated in DesignProblem, but not recorded)~~
-% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-for i = 1:4
-if input(i) < data.minThrust
-    input(i) = data.minThrust;
-elseif input(i) > data.maxThrust
-    input(i) = data.maxThrust;
-else
-    input(i) = input(i);
-end
-end
-
+% % Regulate Roll Rate
+% if input(2) < -data.maxRollRate
+%     input(2) = -data.maxRollRate;
+% elseif input(1) > data.maxRollRate
+%     input(2) = data.maxRollRate;
+% else
+%     input(2) = input(2);
+% end
+% 
+% % Regulate Yaw Rate
+% if input(3) < -data.maxYawRate
+%     input(3) = -data.maxYawRate;
+% elseif input(3) > data.maxYawRate
+%     input(3) = data.maxYawRate;
+% else
+%     input(3) = input(3);
+% end
+% 
+% 
+% % Regulate Thrust
+% if input(4) < data.minThrust
+%     input(4) = data.minThrust;
+% elseif input(4) > data.maxThrust
+%     input(4) = data.maxThrust;
+% else
+%     input(4) = input(4);
+% end
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 actuators.f1 = input(1);
 actuators.f2 = input(2);

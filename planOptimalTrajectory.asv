@@ -75,7 +75,7 @@ problem.bounds.control.upp = [maxThrust; maxThrust; maxThrust; maxThrust];
 
 problem.guess.time = [0,runTime];
 problem.guess.state = [problem.bounds.initialState.low, problem.bounds.finalState.low];
-problem.guess.control = [[mass*gravity/4; mass*gravity/4; mass*gravity/4; mass*gravity/4], [mass*gravity/4; mass*gravity/4; mass*gravity/4; mass*gravity/4]];
+problem.guess.control = [[sqrt(mass*gravity/4); sqrt(mass*gravity/4); sqrt(mass*gravity/4); sqrt(mass*gravity/4)], [mass*gravity/4); sqrt(mass*gravity/4); sqrt(mass*gravity/4); sqrt(mass*gravity/4)]];
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
