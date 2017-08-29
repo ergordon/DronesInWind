@@ -32,13 +32,15 @@ hl = legend('x','y','z','$\dot{x}$','$\dot{y}$','$\dot{z}$','location','northwes
 set(hl, 'Interpreter', 'latex');
 grid on
 xlim([topt(1) topt(end)]);
+xlabel('Time (s)')
 subplot(2,1,2)
 for i = 1:6
     plot(topt,xopt(i,:))
     hold on
 end
 title('OptimTraj Pos & Vel')
-% xlim([topt(1) topt(end)]);
+xlim([topt(1) topt(end)]);
+xlabel('Time (s)')
 hl = legend('x','y','z','$\dot{x}$','$\dot{y}$','$\dot{z}$','location','northwest');
 set(hl, 'Interpreter', 'latex');
 grid on
@@ -52,7 +54,8 @@ end
 title('Simulation Angles')
 hl = legend('$\phi$','$\psi$','$\theta$','$\dot{\phi}$','$\dot{\theta}$','$\dot{\psi}$','location','southwest');
 set(hl, 'Interpreter', 'latex');
-% xlim([topt(1) topt(end)]);
+xlim([topt(1) topt(end)]);
+xlabel('Time (s)')
 ylim([-2 2])
 grid on
 subplot(2,1,2)
@@ -61,8 +64,8 @@ for i = 7:12
     hold on
 end
 title('OptimTraj Angles')
-
-% xlim([topt(1) topt(end)]);
+xlabel('Time (s)')
+xlim([topt(1) topt(end)]);
 hl = legend('$\phi$','$\psi$','$\theta$','$\dot{\phi}$','$\dot{\theta}$','$\dot{\psi}$','location','southwest');
 set(hl, 'Interpreter', 'latex');
 grid on
@@ -75,12 +78,12 @@ for i = 1:4
     hold on
 end
 title('Simulation Input')
-% xlim([topt(1) topt(end)]);
+xlabel('Time (s)')
+xlim([topt(1) topt(end)]);
 % ylim([-10 10])
 grid on
-hl = legend('w1','w2','w3','w4','location','northwest');
-set(hl, 'Interpreter', 'latex');
-% xlabel('$\dot{T}$'),ylabel('$\dot{y}');
+hl = legend('f1','f2','f3','f4','location','northwest');
+
 
 grid on
 subplot(2,1,2)
@@ -89,8 +92,8 @@ for i = 1:4
     hold on
 end
 title('OptimTraj Input')
-
-% xlim([topt(1) topt(end)]);
+xlabel('Time (s)')
+xlim([topt(1) topt(end)]);
 grid on
-hl = legend('w1','w2','w3','w4','location','northwest');
-set(hl, 'Interpreter', 'latex');
+hl = legend('f1','f2','f3','f4','location','northwest');
+

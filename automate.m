@@ -1,10 +1,10 @@
 % Constants to be applied
 clear; 
-xFinal = 0;
-yFinal = 0;
-zFinal = 5;
-timeDensity = 200;
-runTime = 6;
+xFinal = 2;
+yFinal = 4;
+zFinal = 2;
+timeDensity = 500;
+runTime = 4;
 
 gravity = 9.81;
 mass = 1;

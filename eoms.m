@@ -45,12 +45,9 @@ Tau_b = [tau_phi; tau_theta; tau_psi];
 
 
 equationsOfMotion = [xdot;ydot;zdot;
-    
-        ([0;0;-gravity]+R*Tb/mass);
-        
-        (inv(Rw)*[phidot;thetadot;psidot]);
-        
-        inv(I)*Tau_b-cross(omega_b,I*omega_b)]
+                    ([0;0;-gravity]+R*Tb/mass);
+                    (inv(Rw)*[phidot;thetadot;psidot]);
+                     inv(I)*Tau_b-cross(omega_b,I*omega_b)]
     
 pos = [x;y;z];
 

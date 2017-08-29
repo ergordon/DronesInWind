@@ -105,21 +105,19 @@ if data.index <= length(data.trajT)
   Time_diff = abs(data.trajT(data.index)-sensors.t);
     
     data.index = data.index + 1;
-    data.index;
     
     trajX = data.trajX(ind);
-    trajXdot = data.trajXdot(ind);
     trajY = data.trajY(ind);
-    trajYdot = data.trajYdot(ind);
     trajZ = data.trajZ(ind);
+    trajXdot = data.trajXdot(ind);
+    trajYdot = data.trajYdot(ind);
     trajZdot = data.trajZdot(ind);
     trajPhi = data.trajPhi(ind);
-    trajPhidot = data.trajPhidot(ind);
     trajTheta = data.trajTheta(ind);
-    trajThetadot = data.trajThetadot(ind);
     trajPsi = data.trajPsi(ind);
+    trajPhidot = data.trajPhidot(ind);
+    trajThetadot = data.trajThetadot(ind);
     trajPsidot = data.trajPsidot(ind);
-    
     trajF1 = data.trajF1(ind);
     trajF2 = data.trajF2(ind);
     trajF3 = data.trajF3(ind);
@@ -128,16 +126,18 @@ if data.index <= length(data.trajT)
 else
     
     trajX = data.trajX(end);
-    trajXdot = data.trajXdot(end);
     trajY = data.trajY(end);
-    trajYdot = data.trajYdot(end);
     trajZ = data.trajZ(end);
+    trajXdot = data.trajXdot(end);
+    
+    trajYdot = data.trajYdot(end);
+    
     trajZdot = data.trajZdot(end);
     trajPhi = data.trajPhi(end);
-    trajPhidot = data.trajPhidot(end);
     trajTheta = data.trajTheta(end);
-    trajThetadot = data.trajThetadot(end);
     trajPsi = data.trajPsi(end);
+    trajPhidot = data.trajPhidot(end);
+    trajThetadot = data.trajThetadot(end);
     trajPsidot = data.trajPsidot(end);
     
     trajF1 = parameters.m*parameters.g/4;
@@ -148,23 +148,27 @@ else
     
 end
 
-A = data.funcA(trajXdot, trajYdot, trajZdot, trajPhi, trajTheta, trajPsi, trajPhidot, trajThetadot, trajPsidot, trajF1, trajF2, trajF3, trajF4);
+A = data.funcA(trajXdot, trajYdot, trajZdot, trajPhi,trajTheta, trajPsi,...
+               trajPhidot, trajThetadot,trajPsidot, trajF1, trajF2, trajF3, trajF4);
 B = data.funcB(trajPhi,trajTheta,trajPsi);
 
 data.K = lqr(A,B,data.Q,data.R);
 
 % Calculate and apply input
 state = [sensors.x - trajX; 
-         sensors.xdot - trajXdot;
          sensors.y - trajY;
-         sensors.ydot - trajYdot;
          sensors.z - trajZ; 
-         sensors.zdot - trajZdot; 
+         
+         sensors.xdot - trajXdot;
+         sensors.ydot - trajYdot;
+         sensors.zdot - trajZdot;
+         
          sensors.phi - trajPhi;
-         sensors.phidot - trajPhidot;
          sensors.theta - trajTheta;
-         sensors.thetadot - trajThetadot;
          sensors.psi - trajPsi
+         
+         sensors.phidot - trajPhidot;
+         sensors.thetadot - trajThetadot;      
          sensors.psidot - trajPsidot];
     
  
