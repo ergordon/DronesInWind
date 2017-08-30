@@ -12,6 +12,8 @@
 \usepackage{float}
 \usepackage{enumitem}
 \usepackage[export]{adjustbox}
+\usepackage{esvect}
+\usepackage{ulem}
 \setlist{nosep,after=\vspace{\baselineskip}}
 % Two more packages that make it easy to show MATLAB code
 \usepackage[T1]{fontenc}
@@ -42,29 +44,178 @@ The "Drones in Wind" simulation simulates the flight of a quadcopter drone. The 
 %                                                                                 Model                                                                                  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Model}
+\subsection{State}
 The motion of the drone is governed by the ordinary differential equations with the state defined as
 \begin{equation}
 \label{state}
-\dot{x} = \begin{bmatrix} \dot{x}\\ \frac{f\sin{\theta}}{m} \\ \dot{z} \\ \frac{f\cos{\theta}}{m} - g \\ \omega \end{bmatrix}
-= \frac{d}{dt}
-\begin{bmatrix} x \\ \dot{x} \\ z \\ \dot{z} \\ \theta 
-\end{bmatrix}
+x = \begin{bmatrix} x\\y\\z \end{bmatrix},
+\dot{x} = \begin{bmatrix} \dot{x} \\ \dot{y}\\ \dot{z} \end{bmatrix},
+\theta = \begin{bmatrix} \phi\\ \theta\\ \psi \end{bmatrix},
+\dot{\theta} = \begin{bmatrix} \dot{\phi} \\ \dot{\theta}\\ \dot{\psi} \end{bmatrix}
 \end{equation}
-such that $x$ and $z$ correspond to horizontal and vertical position, respectively, while $\theta$ corresponds to the angle of the quad from upright. The inputs for the system are defined as
+such that $x$ and $z$ correspond to horizontal and vertical position, respectively, while $\phi, \theta, \psi$ correspond to the roll, pitch, and yaw angles respectively. However, the angular velocity vector $\omega \neq \dot{\theta}$. 
+
+\subsection{Kinematics}
+The angular velocity vector, $\omega$ is not the same as $\dot{\theta}$, which is just the time derivative of the angles\cite{QDSC}. To convert the angular velocities into the angular velocity vector, we use the following relation:
 \begin{equation}
-\label{inputs}
-u = \begin{bmatrix} \omega \\ f \end{bmatrix}
-\end{equation}
-such that $\omega$ corresponds to angular pitch rate and $f$ corresponds to thrust. Taking the Jacobian lends the following A and B matrices shown by Equation \ref{A_matrix_intermediate} and Equation \ref{B_matrix_intermediate}
-\begin{equation}
-\label{A_matrix_intermediate}
-A = \begin{bmatrix} 0 && 1 && 0 && 0 && 0 \\ 0 && 0 && 0 && 0 && \frac{f\cos{\theta}}{m} \\  0 && 0 && 0 && 1 && 0 \\ 0 && 0 && 0 && 0 && \frac{-f\sin{\theta}}{m} \\ 0 && 0 && 0 && 0 && 0 \end{bmatrix}
+\omega = \begin{bmatrix}
+1 && 0 && 0 \\ 0 && \cos(\phi) && \cos(\theta)\sin(\phi) \\ 0 && -\sin(\phi) && \cos(\theta)\cos(\phi) \end{bmatrix} \dot{\theta}
 \end{equation}
 
+\clearpage
+ The body and inertial frame are related by the rotation matrix R, which goes from the body to inertial frame using the ZYX Euler angle convention.
+ 
 \begin{equation}
-\label{B_matrix_intermediate}
-B = \begin{bmatrix} 0 && 0 \\ 0 && \frac{\sin{\theta}}{m} \\ 0 && 0 \\ 0 && \frac{\cos{\theta}}{m} \\ 1 && 0 \end{bmatrix}
+R = \begin{bmatrix}
+\cos(\psi)\cos(\theta) && \cos(\psi)\sin(\phi)\sin(\theta) - \cos(\phi)\sin(\psi) && \sin(\phi)\sin(\psi) + \cos(\phi)\cos(psi)\sin(\theta) \\
+\cos(\theta)\sin(\psi) && \cos(\phi)\cos(\psi) + \sin(\phi)\sin(\psi)\sin(\theta) && \cos(\phi)\sin(\psi)\sin(\theta) - \cos(\psi)\sin(\phi) \\
+-\sin(\theta) && \cos(\theta)\sin(\phi) && \cos(\phi)\cos(\theta)
+\end{bmatrix} 
 \end{equation}
+
+\subsection{Forces}
+The force of each motor is directly proportional to the angular velocity of that motor by:
+\begin{equation}
+T = k\omega^2
+\end{equation}
+Where  $k$ is a function of different constants unique to the quadrotor and derived in QDSC\cite{QDSC}.
+\newline
+The thrust in the body frame is simply
+\begin{equation}
+T_{B} = k \begin{bmatrix}
+0 \\ 0 \\ \omega_{1}^2+\omega_{2}^2+\omega_{3}^2+\omega_{4}^2 \end{bmatrix}
+\end{equation}
+Later on we will discuss future steps and how those constants will allow us to control the power supplied to the motors. But for now, we will simply use the force of each motor in our simulation as: 
+\begin{equation*}
+input(\textit{i}) = f_{i} = \omega_{i}^2
+\end{equation*}
+\newline
+The drag force is calculated by 
+\begin{equation*}
+\vv{F_{D}} = \frac{1}{2} \rho C_{D} A v^2
+\end{equation*}
+For our simulation, we will assume $\vv{F_{D}}$ is $[0,0,0]^T$, because we do not know enough about the quadcopter specs to model it accurately, though we will still include it in the equations of motions.
+
+\subsection{Torques}
+Each rotor contributes some torque about the body axis. The roll (\ref{rolltorque}) and pitch (\ref{pitchtorque}) torque are respectively
+\begin{equation}\label{rolltorque}
+\tau_{\phi} = Lk(f_{3}-f_{1})
+\end{equation}
+\begin{equation} \label{pitchtorque}
+\tau_{\theta} = Lk(f_{4}-f_{2})
+\end{equation}
+and the yaw torque is defined as 
+\begin{equation}
+\tau_{\psi} = b(f_{1}-f_{2}+f_{3}-f_{4})
+\end{equation}
+Where $L$ is the distance from the inertial center of the quadrotor to the $i$th motor. $k$ and $b$ are constants defined in \cite{QDSC}. The total torque \textit{(without drag)} is $\tau=[\tau_{phi},\tau_{theta},\tau_{psi}]^T$
+
+\subsection{Equations of Motion}
+To start, the velocity and accelerations are simply:
+\begin{equation}
+\dot{x} = \begin{bmatrix} \dot{x}\\ \dot{y} \\ \dot{z} \end{bmatrix}, 
+\ddot{x} =  \begin{bmatrix} 0\\0\\-g \end{bmatrix} + \frac{RT_{B} +F_{D}}{m}
+\end{equation}
+
+The angular velocities in the inertial frame are: 
+\begin{equation}
+\omega = \begin{bmatrix}
+1 && 0 && 0 \\ 0 && \cos(\phi) && \cos(\theta)\sin(\phi) \\ 0 && -\sin(\phi) && \cos(\theta)\cos(\phi) \end{bmatrix}^{-1} \dot{\theta}
+\end{equation}
+
+Finally, the angular accelerations are defined in equation
+
+\begin{equation}
+\dot{\omega} = I^{-1}(\tau-\omega \times (I\omega))
+\end{equation}
+If $I$, the Inertia Matrix, is axis-symmetric in the form
+\begin{equation*}
+I = \begin{bmatrix} I_{xx} && 0 && 0 \\ 0 && I_{yy} && 0 \\ 0 && 0 && I_{zz} \end{bmatrix},
+\end{equation*}
+then 
+\begin{equation*}
+\dot{\omega} = \begin{bmatrix}
+\tau_{\phi}I_{xx}^{-1} \\ \tau_{\theta}I_{yy}^{-1} \\ \tau_{\psi}I_{zz}^{-1}\end{bmatrix}
+-\begin{bmatrix}
+\frac{I_{yy}-I_{zz}}{I_xx}\omega_{y} \omega_{z} \\ 
+\frac{I_{zz}-I_{xx}}{I_yy}\omega_{x} \omega_{z} \\ 
+\frac{I_{xx}-I_{yy}}{I_zz}\omega_{x} \omega_{y}
+\end{bmatrix}
+\end{equation*}
+
+The matlab code for the forces and torques is simply:
+\begin{quote}
+\begin{lstlisting}
+load('runOptions.mat')
+syms x xdot y ydot z zdot phi phidot theta thetadot psi psidot 
+     	f1 f2 f3 f4 real
+state_sym = [x; xdot; y; ydot; z; zdot; 
+	phi; phidot; theta; thetadot; psi; psidot];
+inputs_sym = [f1 f2 f3 f4];
+
+k = 1;
+b = 1;
+Tb = [0;0;f1+f2+f3+f4];
+
+tau_phi = k*(f3-f1)*dim_1;
+tau_theta = k*(f4-f2)*dim_2;
+tau_psi = b*(f1-f2+f3-f4);
+Tau_b = [tau_phi; tau_theta; tau_psi];
+
+\end{lstlisting}
+\end{quote}
+\clearpage
+The moment and rotation matrices are then:
+\begin{quote}
+\begin{lstlisting}
+I = [Ix 0 0; 0 Iy 0; 0 0 Iz];
+Rw = [1 0 -sin(theta); 
+           0 cos(phi) cos(theta)*sin(phi); 
+           0 -sin(phi) cos(theta)*cos(phi)];
+
+Rz = [cos(psi) -sin(psi) 0;
+      sin(psi) cos(psi) 0;
+      0 0 1];
+Ry = [cos(theta) 0 sin(theta);
+      0 1 0;
+      -sin(theta) 0 cos(theta)];
+Rx = [1 0 0;
+      0 cos(phi) -sin(phi);
+      0 sin(phi) cos(phi)];
+R= Rz*Ry*Rx;  
+
+\end{lstlisting}
+\end{quote}
+Lastly, the equations of motion are easily expressed as:
+\begin{quote}
+\begin{lstlisting}
+equationsOfMotion = [xdot;ydot;zdot;
+                    ([0;0;-gravity]+R*Tb/mass);
+                    (inv(Rw)*[phidot;thetadot;psidot]);
+                     inv(I)*Tau_b-cross(omega_b,I*omega_b)]
+                     
+                     
+\end{lstlisting}
+\end{quote}
+
+
+\subsection{Linearizion}
+To linearize, we do what we've always done. 
+\begin{quote}
+\begin{lstlisting}
+load('runOptions')
+syms x xdot y ydot z zdot phi phidot theta thetadot psi psidot f1 f2 f3 f4 real
+% Symbolic description of A matrix
+A = jacobian(equationsOfMotion,state_sym);
+% Symbolic description of B matrix
+B = jacobian(equationsOfMotion,inputs_sym);
+
+% Create functions
+data.funcA = matlabFunction(A,'Vars',[xdot ydot zdot phi theta psi phidot thetadot psidot f1 f2 f3 f4]);
+data.funcB = matlabFunction(B,'Vars',[phi theta psi]);
+
+\end{lstlisting}
+\end{quote}
 There is no need to substitute in equilibrium conditions because we will be linearizing about a trajectory.
 
 
@@ -95,21 +246,28 @@ The simulations begins by setting up the function dynamics, \lstinline!problem.f
 \begin{quote}
 \begin{lstlisting}
 syms xdot x zdot z theta w thrust real
-EOMs= [xdot;
-       (thrust/mass)*sin(theta);
-       zdot;
-       (thrust/mass)*cos(theta)-gravity;
-       w];
+EOMs= [xdot;ydot;zdot;
+      ([0;0;-gravity]+R*Tb/mass);
+      (inv(Rw)*[phidot;thetadot;psidot]);
+       inv(I)*Tau_b-cross(omega_b,I*omega_b)];
 
-numf = matlabFunction(EOMs,'vars',[x xdot z zdot theta w thrust]);
-problem.func.dynamics= @(t,x,u) numf( x(1,:),x(2,:),x(3,:),x(4,:),x(5,:),
-                                      u(1,:),u(2,:)) );
+numf = matlabFunction(simplify(equationsOfMotion),...
+   		      'vars',[x y z xdot ydot zdot...
+			      phi theta psi phidot thetadot psidot...
+			      f1 f2 f3 f4]);
+problem.func.dynamics = @(t,x,u)( numf(x(1,:), x(2,:), x(3,:),...
+                                       x(4,:), x(5,:), x(6,:),...
+                                       x(7,:), x(8,:), x(9,:),...
+                                       x(10,:), x(11,:), x(12,:),...
+                                       u(1,:), u(2,:), u(3,:), u(4,:) ));
 
 \end{lstlisting}
 \end{quote}
 
 \subsubsection{Problem Bounds}
-The next step is to set up the \lstinline!problem.bounds!. For the function dynamics, a mass-normalized thrust was chosen to keep the model simple, shown in table \ref{Problem Bounds} below. These parameters were chosen so that results of the simulation can be compared to results from D'Andrea's paper\cite{D'Andrea}. 
+\sout{The next step is to set up the \lstinline!problem.bounds!. For the function dynamics, a mass-normalized thrust was chosen to keep the model simple, shown in table \ref{Problem Bounds} below. These parameters were chosen so that results of the simulation can be compared to results from D'Andrea's paper}\cite{D'Andrea}.
+
+The new problem bounds are derived from the D'Andrea paper but have been adapted to the current model.  Namely, the thrust values now reflect the per-rotor thrust instead of the total.  They are shown in table \ref{Problem Bounds} below:
 
 \begin{table}[H]
 \begin{center}
@@ -119,11 +277,10 @@ The next step is to set up the \lstinline!problem.bounds!. For the function dyna
  Parameter & Value & Description\\
  \hline
  $t_{i}$   & 0 s  & Initial time\\
- $t_{f}$  & 2 s  & Final time\\
- $\underline{F}/m$ & 1 m/$s^{2}$ & Min thrust\\
- $\overline{F}/m$ & 20 m/$s^{2}$ & Max thrust\\
- $\overline{\omega}$ & 10 rad/s & Max pitch rate \\
- \hline
+ $t_{f}$  & 4 s  & Final time\\
+ $\underline{F_{i}}/m$ & $\frac{1}{4}$ m/$s^{2}$ & Min thrust\\
+ $\overline{F_{i}}/m$ & 5 m/$s^{2}$ & Max thrust\\
+  \hline
 \end{tabular}
 \caption{Problem Bounds }
 \label{Problem Bounds}
@@ -133,28 +290,15 @@ The next step is to set up the \lstinline!problem.bounds!. For the function dyna
 
 
 \subsubsection{Cost Function}
-Using a cost function, an optimized trajectory around any aspect of the simulation can be found. The cost functions available for different variables are shown below. 
+Using a cost function, an optimized trajectory around any aspect of the simulation can be found. The time optimal cost function is shown below.
 \begin{quote}
 \begin{lstlisting}
-% Input:
-problem.func.pathObj = @(t,x,u)( sum(u.^2,1) );
-
-% Thrust:
-problem.func.pathObj = @(t,x,u)( sum(u(2,:).^2,1) );
-
-% Pitch Rate:
-problem.func.pathObj = @(t,x,u)( sum(u(1,:).^2,1) );
-
-% Time
-problem.func.pathObj = @(t,x,u)( sum((x(1,:)-x_f).^2,1) 
-                                +sum((x(3,:)-z_f).^2,1))
 
 % Time objective function for boundary points
 problem.func.bndObj = @(t0,x0,tF,xF) (tF-t0)
 
 \end{lstlisting}
 \end{quote}
-For our purposes, we explicitly used the "Time objective function for boundary points" and the other cost functions were commented out.
 
 \clearpage
 
@@ -207,18 +351,32 @@ Logic is used at the start of the control loop to determine if there is still tr
 \begin{quote}
 \begin{lstlisting}
 % Reference trajectory
+
+% Reference trajectory
 ind = data.index;
-if data.index < length(data.trajT)
+if data.index <= length(data.trajT)    
     trajX = data.trajX(ind);
-    trajXdot = data.trajXdot(ind);
+    trajY = data.trajY(ind);
     trajZ = data.trajZ(ind);
+    
+    trajXdot = data.trajXdot(ind);
+    trajYdot = data.trajYdot(ind);
     trajZdot = data.trajZdot(ind);
+    
+    trajPhi = data.trajPhi(ind);
     trajTheta = data.trajTheta(ind);
-    trajW = data.trajW(ind);
-    trajF = data.trajF(ind);
-    data.index = data.index + 1;
-
-
+    trajPsi = data.trajPsi(ind);
+    
+    trajPhidot = data.trajPhidot(ind);
+    trajThetadot = data.trajThetadot(ind);
+    trajPsidot = data.trajPsidot(ind);
+    
+    trajF1 = data.trajF1(ind);
+    trajF2 = data.trajF2(ind);
+    trajF3 = data.trajF3(ind);
+    trajF4 = data.trajF4(ind);
+	
+    data.index = data.index + 1;   
 \end{lstlisting}
 \end{quote}
 Where \lstinline!data.index! is initialized at 1. 
@@ -227,16 +385,16 @@ Where \lstinline!data.index! is initialized at 1.
 After determining that the simulation is still within the regime in which a trajectory is available, the controller will find the respective trajectory point to linearize about for the current time-step.  The angle and thrust for this trajectory point is passed into the MATLAB functions to determine the relevant A and B matrices, which are then used in conjunction with the already initialized weights to create a gain matrix using LQR.
 \begin{quote}
 \begin{lstlisting}
-A = data.funcA(trajTheta,trajF);
-B = data.funcB(trajTheta);
+A = data.funcA(trajXdot, trajYdot, trajZdot, trajPhi,trajTheta, trajPsi,
+               trajPhidot, trajThetadot,trajPsidot, 
+               trajF1, trajF2, trajF3, trajF4);
+B = data.funcB(trajPhi,trajTheta,trajPsi);
 data.K = lqr(A,B,data.Q,data.R);
 
 \end{lstlisting}
 \end{quote}
 
-Finally, the input $u = -Kx + n$ is applied in which $K$ is the previously specified gain matrix, $x$ is the difference between the current state and the trajectory state at the current time, and $n$ is the trajectory input at the current time. As an example, when the quadroter is meant to be at hover, $n = -mg$.
-
-\clearpage
+Finally, the input $u = -Kx$ is applied in which $K$ is the previously specified gain matrix and $x$ is the difference between the current state and the trajectory state at the current time.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                         Running Simulation                                                                                %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -250,15 +408,15 @@ clear;
 
 TimeDensity = 400;
 xFinal = 5;
+yFinal = 5;
 zFinal = 5;
 runTime = 2;
 
 gravity = 9.81;
 mass = 1;
 
-maxPitchRate = 10;
-maxThrust = 20;
-minThrust = 1;
+maxThrust = 5;
+minThrust = 0.25;
 
 save('runOptions.mat');
 
@@ -277,10 +435,8 @@ AnalysisOfOptimalTrajectory()
 %                                                                                Analysis  of Optimal Trajectory  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Analysis of Optimal Trajectory}
-
-In this section, the trajectory for $x=5,z=5$ was analyzed. First the Optimal trajectory was calculated and saved, then the simulation was run and data stored, and finally both results were plotted against each other. \textbf{Solid lines} show the optimal trajectory, and \textbf{dashed lines} show the simulated quad-rotor path.
-
-Ultimately, the results will be compared to \textbf{one} of D'Andrea's results\cite{D'Andrea}. 
+ 
+I will \textcolor{red}{\textbf{lazily}} compare different plots of the simulation and optimal trajectory.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                Simulation Analysis               %
@@ -297,73 +453,54 @@ uopt = u;
 
 load data
 tsim = processdata.t;
-xsim = [processdata.x; processdata.xdot; processdata.z; processdata.zdot;    processdata.theta];
-usim = [controllerdata.actuators.pitchrate;...
-	controllerdata.actuators.thrust];
+xsim = [processdata.x; processdata.y; processdata.z;
+        processdata.xdot; processdata.ydot; processdata.zdot; 
+        processdata.phi; processdata.theta;processdata.psi;
+        processdata.phidot; processdata.thetadot; processdata.psidot];
+    
+usim = [controllerdata.actuators.f1; 
+        controllerdata.actuators.f2;
+        controllerdata.actuators.f3;
+        controllerdata.actuators.f4];
 \end{lstlisting}
 \end{quote}
-The preceding lines of code are meant to show how easily the data can be unpacked and plotted against each other. Below, Figure \ref{State Plot} shows the optimal and actual state of the quadrotor, and Figure \ref{Input Plot} shows the optimal and actual inputs of the quadrotor.
+The preceding lines of code are meant to show how easily the data can be unpacked and plotted against each other. The below figures show the trajectory and simulated states and inputs of the quadrotor for varying goal positions.
 \newline
 \newline
 
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                          Comparison with D'Andrea Results                %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Comparison with D'Andrea Results}
-
-We can compare the simulated trajectory with that of \textit{Performance Benchmarking of Quadrotor Systems Using Time-Optimal Control} \cite{D'Andrea}. The trajectory to be compared to from D'Andrea's paper is shown in Figure \ref{D'Andrea Plot}
-
-Reminder, \textbf{Solid lines} show the calculated optimal trajectory. \textbf{Dashed lines} show the simulated quad-rotor path.
-
-\begin{figure}[h!]
-  \centering
-  \begin{minipage}[b]{0.49\textwidth}
-    \includegraphics[width=\textwidth]{State.png}
-    \caption{\label{State Plot} Quadcopter state over time.}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[b]{0.49\textwidth}
-    \includegraphics[width=\textwidth]{Inputs.png}
-    \caption{\label{Input Plot} Quadcopter Inputs over time.}
-  \end{minipage}
-\end{figure}
 
 \begin{figure}[H]
-\centerline{\includegraphics[width=9cm, height=8.5cm]{DAndrea_55_Plot.png}}
-  \caption{\label{D'Andrea Plot} Screenshot of D'Andrea Results}
+\centerline{\includegraphics[scale=0.45]{0_0_5.PNG}}
+  \caption{\label{0_0_5} x=0, y=0, z=5}
   \label{fig}
 \end{figure}
 
-Though both results are nearly identical, the biggest difference in performance is in that of the inputs. 
-D'Andrea input for thrust is bang-bang, meaning there is a switch discontinuity and the input only takes the minimum and maximum values \cite{BangBangControl}. D'Andrea's pitch rate is bang-singular, meaning the control input is always at full positive or negative saturation, except during singular arcs \cite{D'Andrea}.
+\begin{figure}[H]
+\centerline{\includegraphics[scale=0.45]{5_0_5.PNG}}
+  \caption{\label{5_0_5} x=5, y=0, z=5}
+  \label{fig}
+\end{figure}
 
-In our model, the inputs were free to vary as continuously as possible between the bounds set in table \ref{Problem Bounds}. Despite this, both models arrived at the destination $x=z=5$ following approximately the same time-optimal path and input behavior. In order to completely match input behavior, this issue may be resolved through tinkering with OptimTraj.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                              D'Andrea Results                                                                        %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\begin{figure}[H]
+\centerline{\includegraphics[scale=0.45]{2_4_2.PNG}}
+  \caption{\label{2_4_2} x=2, y=4, z=2}
+  \label{fig}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                Future Work                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Future Work}
-With the completion of a 2D optimized drone path, plans to enhance the simulation are underway. Two main additions will be added to the current simulation in order to complete this task. Those are as follows 
-\newline
-\begin{itemize}
-  \item Implement 3D rigid body dynamics
-  \item Implement additional aerodynamic forces such as drag and ground effect
-\end{itemize}
-\textit{Controlling of an Single Drone}\cite{Controlling of an Single Drone} provides an outline for how to linearize a 3D quadcopter using rigid body dynamics. A key difference to note is that in the dynamics discussed in \cite{Controlling of an Single Drone}, each of the four quadrotor blades can produce its own thrust, which will then control the pitch, roll, and yaw of the rigid body. Additionally, the paper gives a brief description of the mechanism on applying aerodynamic forces, namely, drag.
 
+\begin{itemize}
+  \item \sout{Implement 3D rigid body dynamics}
+  \item \sout{Implement additional aerodynamic forces such as drag and ground effect}
+\end{itemize}
+\textit{Controlling of an Single Drone}\cite{Controlling of an Single Drone} provides an outline for how to linearize a 3D quadcopter using rigid body dynamics. A key difference to note is that in the dynamics discussed in {\cite{Controlling of an Single Drone}, each of the four quadrotor blades can produce its own thrust, which will then control the pitch, roll, and yaw of the rigid body. Additionally, the paper gives a brief description of the mechanism on applying aerodynamic forces, namely, drag.}
+\newline
+\newline
+\textit{Quadcopter Dynamics, Simulation, and Control}\cite{QDSC} provides the outline as to how we managed to redo the dynamics model. It also gives us step-by-step processes on creating a relationship between voltage drop across a motor and the thrust produced by the respective propeller.  Modelling our control inputs as voltage drops instead of thrusts is a more accurate description of what we will have access to on an actual vehicle, and may serve as preperation for writing flight code.
 
 % Display list of references in IEEE Transactions format.
 \clearpage
@@ -405,7 +542,8 @@ Auton Robot, 33:69-88, 2012.
 
 
 
-
+\bibitem{QDSC}
+\textit{Quadcopter Dynamics, Simulation, and Control}.
 
 
 
